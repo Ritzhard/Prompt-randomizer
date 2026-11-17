@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Picker</title>
+<style>
+:root{
+  --bg:#f4f2ee; --panel:#ffffff; --ink:#1f2328; --muted:#667085; --line:#d9d5cc;
+  --accent:#8a3ffc; --accent-ink:#ffffff; --soft:#f0eafd; --field:#fbfaf8; --ok:#1a7f37;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#15161a; --panel:#1e2026; --ink:#e8e6e1; --muted:#9aa1ad; --line:#33363f;
+    --accent:#a878ff; --accent-ink:#14101f; --soft:#2a2440; --field:#17181d; --ok:#56d364; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:18px 20px 6px;max-width:1280px;margin:0 auto}
+h1{font-size:22px;margin:0}
+#count{color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;padding:10px 20px 40px;max-width:1280px;margin:0 auto;align-items:start}
+@media (max-width:860px){main{grid-template-columns:minmax(0,1fr);padding:10px 16px 40px}header{padding:16px 16px 4px}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 8px}
+h2:first-child{margin-top:0}
+label.f{display:block;font-size:13px;color:var(--muted);margin:8px 0 0}
+select,input[type=search],textarea{width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
+textarea{resize:vertical;font:13px/1.45 ui-monospace,Consolas,"Cascadia Mono",monospace}
+button{font:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btns{display:grid;gap:8px;margin-top:10px}
+.hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+#poolInfo{font-size:13px;margin:10px 0 0}
+#title{font-size:19px;text-transform:none;letter-spacing:0;color:var(--ink);margin:0}
+#meta{color:var(--muted);font-size:13px;margin:2px 0 0}
+#notes{font-size:12.5px;color:var(--muted);margin:6px 0 0;white-space:pre-wrap}
+.slot{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:var(--field)}
+.slot.locked{border-color:var(--accent);background:var(--soft)}
+.slot-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.slot-head b{font-size:13.5px}
+.slot-head .src{color:var(--muted);font-size:12.5px;flex:1;min-width:120px}
+.slot-head label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer}
+.slot-head button{padding:3px 9px;font-size:12.5px}
+.slot textarea{background:var(--panel)}
+#out{min-height:260px}
+.outbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+#copied{color:var(--ok);font-size:13px}
+.checks{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-top:8px}
+.checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-size:13px;color:var(--muted)}
+#msg{color:#c4320a;font-size:13px;margin:8px 0 0;min-height:1em}
+</style>
+</head>
+<body>
+<header><h1>Prompt Picker</h1></header>
+<main>
+  <section class="panel">
+    <h2>1. Filter</h2>
+    <label class="f">Game<select id="fGame"></select></label>
+    <label class="f">Gender<select id="fGender">
+      <option value="">Any</option><option value="female">Female</option><option value="male">Male</option><option value="other">Creatures and pairs</option>
+    </select></label>
+    <label class="f">Search<input id="fSearch" type="search"></label>
+
+    <h2>2. Pick</h2>
+    <label class="f">Character<select id="charSel"></select></label>
+    <div class="btns">
+      <button id="btnRandChar" class="primary">Random character</button>
+      <button id="btnMix" class="primary">True random (mix parts)</button>
+    </div>
+    <p id="msg"></p>
+    <label class="f">Body features in true random<select id="optBody">
+      <option value="sometimes">Sometimes (50%)</option><option value="always">Always</option><option value="never">Never</option>
+    </select></label>
+
+    <details>
+      <summary>Settings</summary>
+      <label class="f">Fixed first line (never randomized)<textarea id="fixed" rows="9"></textarea></label>
+      <div class="outbar"><button id="btnResetFixed">Reset fixed line</button></div>
+      <label class="f" style="margin-top:14px">Load an updated All_Prompts.txt<input id="fileIn" type="file" accept=".txt" style="margin-top:6px"></label>
+      <p class="hint">Loading a file replaces the built-in prompts until you reload the page.</p>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2 id="title">Pick a character or press a random button</h2>
+    <p id="notes"></p>
+    <div id="slots"></div>
+
+    <h2>Prompt</h2>
+    <textarea id="out" readonly spellcheck="false"></textarea>
+    <div class="outbar"><button id="btnCopy" class="primary">Copy prompt</button><span id="copied"></span></div>
+    <div class="checks">
+      <label><input type="checkbox" id="optFixed" checked> Include the fixed first line</label>
+    </div>
+  </section>
+</main>
+
+<script id="data" type="text/plain">/*DATA*/</script>
+<script>
+"use strict";
+const DEFAULT_FIXED = "(masterpiece:1.4), (best quality:1.3), (ultra detail:1.3), (8k resolution:1.2), absurdres, highres, sharp focus, skin texture, detailed shading, volumetric lighting, dramatic lighting, depth of field, vibrant colors, aesthetic, studio anime style, anime screencap style, clean lineart, awe-inspiring, amazing quality, ultra-detailed, detailed hair, individual hair strands, beautiful face, intricate face, soft lips, smooth skin, glossy skin, (artist:mazjojo:0.75), (artist:pigeon666:0.70),(artist:zawar379:0.80), (artist:remsrar:0.65),(artist:chimmyming:0.72), (artist:yoneyama mai:0.73), TAxStyle, Pixie_eyelashes, Wada Arco style,";
+const LITE_DROP = ["skin texture", "soft lips", "smooth skin", "glossy skin"];
+const GAMES = {1:"Custom prompts", 2:"Fantasy originals", 3:"Fate/Grand Order", 4:"Genshin Impact", 5:"Honkai: Star Rail", 6:"Epic Seven", 7:"Unicorn Overlord", 8:"Stardew Valley"};
+const SLOTS = [
+  {k:"face",    label:"Face, hair, eyes, head accessories"},
+  {k:"body",    label:"Body features"},
+  {k:"clothes", label:"Clothes and accessories"},
+  {k:"pose",    label:"Camera, pose and action"},
+  {k:"scene",   label:"Setting, framing and body type"}
+];
+// Extra body-feature bundles for true random, so this section works for every gender and game.
+const BODY_POOL = [
+  {name:"Scars", t:"(scars, scar across chest, scar on arm, old battle scars, healed wounds)"},
+  {name:"Tribal tattoos", t:"(tribal tattoo, arm tattoo, shoulder tattoo, black ink markings, linework tattoo)"},
+  {name:"Glowing runes", t:"(glowing runes on skin, glowing tattoo, magic circuit lines, blue glowing markings)"},
+  {name:"Dragon scales", t:"(scales on cheek, scaled forearms, scaled shoulders, iridescent scales, sharp claws)"},
+  {name:"Dragon tail", t:"(thick dragon tail, scaled tail, tail spikes, tail curled behind)"},
+  {name:"Bat wings", t:"(black bat wings, demon wings, leathery wings, wing claws, wings half spread)"},
+  {name:"Feathered wings", t:"(white feathered wings, angel wings, large wings, drifting feathers)"},
+  {name:"Black feathered wings", t:"(black feathered wings, fallen angel wings, ragged feathers, wings folded)"},
+  {name:"Demon tail", t:"(demon tail, spade tail, slender black tail, tail curled upward)"},
+  {name:"Fox tails", t:"(fox tail, large fluffy tail, multiple tails, white tail tips)"},
+  {name:"Cat tail", t:"(cat tail, long slender tail, tail swaying, fluffy tail tip)"},
+  {name:"Wolf tail", t:"(wolf tail, bushy grey tail, thick fur)"},
+  {name:"Stitches", t:"(stitches, stitched skin, stitched arm, black thread, patchwork skin, two-tone skin)"},
+  {name:"Extra eyes", t:"(extra eyes, additional eyes:1.2), (eye on forehead, eye on cheek, eye on hand), uneven eyes, body horror"},
+  {name:"Prosthetic arm", t:"(mechanical arm, prosthetic arm, metal fingers, exposed gears, brass plating)"},
+  {name:"Doll joints", t:"(doll joints, ball-jointed arms, seam lines on skin, porcelain skin)"},
+  {name:"Crystal growths", t:"(crystal growths on skin, crystals on shoulders, glowing crystal shards embedded in arms)"},
+  {name:"Burn scars", t:"(burn scars, burnt skin on arm, cracked skin, embers glowing in cracks)"},
+  {name:"Cursed arm", t:"(cursed arm, black arm, blackened fingers, dark veins spreading, red glowing cracks)"},
+  {name:"Bandages", t:"(bandages, bandaged arm, bandaged torso, wrapped hands, blood stains on bandages)"},
+  {name:"Freckles", t:"(freckles, freckles on shoulders, sun-kissed skin, tan lines)"},
+  {name:"Body chains", t:"(chains in skin, broken shackles on wrists, chain marks, rusted iron links)"},
+  {name:"Plant growth", t:"(vines growing on body, leaves on skin, flowers sprouting from shoulders, bark-like skin patches)"},
+  {name:"Fins", t:"(fin ears, head fins, small arm fins, scales on hips, webbed fingers)"},
+  {name:"Ghostly", t:"(translucent body, ghostly fade at fingertips, wispy edges, faint blue glow)"},
+  {name:"Insect wings", t:"(insect wings, translucent butterfly wings, iridescent wing pattern)"},
+  {name:"Third eye", t:"(third eye, eye on forehead, glowing third eye, forehead mark)"},
+  {name:"Muscles", t:"(muscular, toned abs, defined arms, veins, broad shoulders)"}
+];
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const trimTail = t => t.trim().replace(/[,\s]+$/, "");
+
+// Split on commas that are outside brackets; "\(" and "\)" are literal and do not count.
+function splitTop(s){
+  const out = []; let depth = 0, cur = "";
+  for (let i = 0; i < s.length; i++){
+    const c = s[i];
+    if (c === "\\" && i + 1 < s.length){ cur += c + s[i+1]; i++; continue; }
+    if (c === "(") depth++;
+    else if (c === ")") depth = Math.max(0, depth - 1);
+    if (c === "," && depth === 0){ if (cur.trim()) out.push(cur.trim()); cur = ""; }
+    else cur += c;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+
+// Every scene line becomes: (white background, no background), (solo, 1girl/1boy, cowboy shot), body type, colored extremities.
+// Only body-type tags survive; scenery, lighting, props, extra artists and old framing tags are dropped.
+const BODY_RE = /breasts|flat chest|^(adult|mature|young|teenage|old|middle-aged)( (man|woman|women|male|female))?$|^child$|^tall( female)?$|^short$|petite|slender|^slim|^thin$|athletic|muscular|toned|^abs$|curvy|wide hips|thick thighs|chubby|plump|^fat$|stocky|bulky|^round$|^huge$|giantess|masculine|^malet$|broad shoulders|androgynous|otoko no ko|-skinned|^tan$|pale skin|grey skin|^(dark )?elf$|monster|^animal$|robot|mecha musume|creature|^ghost$|^were|beast|horse man|goblin|^witch$|raccoon|bear$|wolf$|chibi|armored rider|^(fe)?male$/;
+function standardScene(raw, gender){
+  const flat = splitTop(raw).flatMap(t => {
+    const inner = t.replace(/^\((.*)\)$/, "$1");
+    return t.startsWith("(") && t.endsWith(")") ? splitTop(inner) : [t];
+  }).map(t => t.trim()).filter(Boolean);
+  const low = flat.map(t => t.toLowerCase().replace(/:[\d.]+$/, ""));
+  const has = w => low.indexOf(w) >= 0;
+  let count;
+  if (has("no humans")) count = "solo, no humans";
+  else if (has("2girls")) count = "2girls";
+  else if (has("2boys")) count = "2boys";
+  else if (has("1boy") && has("1girl")) count = "1boy, 1girl";
+  else if (has("1other")) count = "solo, 1other";
+  else count = "solo, " + (gender === "male" ? "1boy" : "1girl");
+  const body = [], seen = {};
+  flat.forEach((t, i) => {
+    const bare = low[i].replace(/^[a-z .'-]+: /, "");
+    if (BODY_RE.test(bare) && !seen[low[i]]){ seen[low[i]] = 1; body.push(t.replace(/:[\d.]+$/, "")); }
+  });
+  if (gender === "male" && !body.length) body.push("masculine");
+  return ["(white background, no background)", "(" + count + ", cowboy shot)"].concat(body, ["colored extremities"]).join(", ");
+}
+
+function makeEntry(f, part, partTitle, quality, br, notes){
+  const n = br.length;
+  let sceneRaw = br[n-1];
+  const boy = /\b(1boy|2boys)\b/.test(sceneRaw), girl = /\b(1girl|2girls)\b/.test(sceneRaw);
+  const multi = (boy && girl) || /\b(2girls|2boys)\b/.test(sceneRaw);
+  const gender = (boy && girl) ? "other" : boy ? "male" : girl ? "female" : "other";
+  const cut = sceneRaw.indexOf("Wada Arco style");
+  if (cut >= 0) sceneRaw = sceneRaw.slice(0, cut);
+  const scene = standardScene(sceneRaw, gender);
+
+  let oi = -1;
+  for (let i = 1; i < n - 1; i++) if (br[i].startsWith("(from")) { oi = i; break; }
+  if (oi < 0) oi = Math.min(1, n - 2);
+  let face = br[0], tag = "";
+  if (part >= 3 && face.startsWith("(")){
+    const idx = face.indexOf(":1.1),");
+    if (idx > 0 && idx < 220){ tag = face.slice(0, idx + 6); face = face.slice(idx + 6).trim(); }
+  }
+  const body = br.slice(1, oi).map(trimTail).join(", ");
+  const toks = splitTop(br[oi]); const cam = [];
+  if (toks.length && toks[0].startsWith("(from")) cam.push(toks.shift());
+  while (toks.length && /^(looking |over the shoulder)/.test(toks[0])) cam.push(toks.shift());
+  const clothes = toks.join(", ");
+  const poseLine = (oi + 1 < n - 1) ? trimTail(br[oi + 1]) : "";
+  const pose = cam.concat(poseLine ? [poseLine] : []).join(", ");
+  const extra = (oi + 2 < n - 1) ? br.slice(oi + 2, n - 1).map(trimTail) : [];
+  const lite = quality.indexOf("glossy skin") < 0;
+  return {
+    code:f[0], name:f[1] || "", group:f[2] || "", source:f[3] || "", part, game: GAMES[part] || partTitle || ("Part " + part),
+    notes, tag, face:trimTail(face), body, clothes:trimTail(clothes), pose, extra, scene, lite, gender, multi,
+    mixable: !lite && !multi && (gender === "male" || gender === "female")
+  };
+}
+
+function parse(text){
+  const L = text.split(/\r?\n/), out = []; let part = 0, partTitle = "";
+  for (let i = 0; i < L.length; i++){
+    const pm = L[i].match(/^PART (\d+) \| ([^|]+)/);
+    if (pm){ part = +pm[1]; partTitle = pm[2].trim(); continue; }
+    if (/^={20,}\s*$/.test(L[i]) && i + 1 < L.length && L[i+1].indexOf(" | ") > 0 && !/^[=#\/\s]/.test(L[i+1])){
+      const f = L[i+1].split(" | ").map(s => s.trim());
+      let j = i + 2; const notes = [];
+      while (j < L.length && !/^={20,}\s*$/.test(L[j])){ notes.push(L[j].trim()); j++; }
+      let k = j + 1, q = ""; const br = [];
+      while (k < L.length && L[k].trim() !== ""){
+        if (L[k].startsWith("(masterpiece")) q = L[k];
+        else if (L[k].startsWith("BREAK ")) br.push(L[k].slice(6).trim());
+        k++;
+      }
+      if (br.length >= 3) out.push(makeEntry(f, part, partTitle, q, br, notes.join("\n")));
+      i = k;
+    }
+  }
+  return out;
+}
+
+let DB = [], LIST = [];
+const state = {title:"", meta:"", notes:"", lite:false, mixable:false, gender:"", parts:{}, src:{}, locks:{}};
+
+function store(key, val){ try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch(e){ return null; } }
+function fixedLine(){ return $("fixed").value.replace(/\s*\n\s*/g, " ").trim() || DEFAULT_FIXED; }
+
+function buildPrompt(){
+  const lines = [];
+  if ($("optFixed").checked){
+    let fx = fixedLine();
+    if (state.lite) fx = splitTop(fx).filter(t => LITE_DROP.indexOf(t.toLowerCase()) < 0).join(", ");
+    fx = trimTail(fx) + ",";
+    lines.push(fx);
+  }
+  for (const s of SLOTS){
+    const t = trimTail(state.parts[s.k] || "");
+    if (!t) continue;
+    lines.push("BREAK " + t + (s.k === "scene" ? "" : ","));
+  }
+  return lines.join("\n");
+}
+
+function refresh(){
+  $("title").textContent = state.title || "Pick a character or press a random button";
+  $("notes").textContent = state.notes;
+  for (const s of SLOTS){
+    const ta = $("ta_" + s.k);
+    if (ta.value !== (state.parts[s.k] || "")) ta.value = state.parts[s.k] || "";
+    $("lock_" + s.k).checked = !!state.locks[s.k];
+    $("slot_" + s.k).classList.toggle("locked", !!state.locks[s.k]);
+  }
+  $("out").value = buildPrompt();
+  $("copied").textContent = "";
+}
+
+function setChar(e){
+  const label = e.code + " " + e.name;
+  state.parts = {
+    face: (e.tag ? e.tag + " " : "") + e.face,
+    body: e.body, clothes: e.clothes,
+    pose: e.pose + e.extra.map(x => ",\nBREAK " + x).join(""),
+    scene: e.scene
+  };
+  state.src = {}; for (const s of SLOTS) state.src[s.k] = state.parts[s.k] ? label : "none";
+  state.locks = {};
+  state.title = e.code + " · " + e.name;
+  state.meta = [e.game, e.group, e.source].filter(Boolean).join(" · ");
+  state.notes = e.notes;
+  state.lite = e.lite; state.mixable = e.mixable; state.gender = e.gender;
+  $("msg").textContent = "";
+  refresh();
+}
+
+function mix(only){
+  const game = $("fGame").value, fg = $("fGender").value;
+  $("msg").textContent = "";
+  if (fg === "other"){ $("msg").textContent = "True random only mixes single male or female characters. Set Gender to Any, Female or Male."; return; }
+  // Gender "Any" mixes male and female freely, section by section; a set gender keeps every section to it.
+  const g = fg;
+  const pool = DB.filter(e => e.mixable && (!game || String(e.part) === game) && (!g || e.gender === g));
+  if (!pool.length){ $("msg").textContent = g ? "No " + g + " characters to mix in this game." : "Nothing in this game can be mixed."; return; }
+  const anyLock = SLOTS.some(s => state.locks[s.k]);
+  const keep = state.mixable && (!!only || anyLock);
+  if (!keep){ state.locks = {}; only = null; state.parts = {}; state.src = {}; }
+  for (const s of SLOTS){
+    if (only && s.k !== only) continue;
+    if (!only && state.locks[s.k]) continue;
+    if (s.k === "body"){
+      const mode = $("optBody").value;
+      const use = only ? mode !== "never" : (mode === "always" || (mode === "sometimes" && Math.random() < 0.5));
+      const bp = pool.filter(e => e.body)
+        .map(e => ({t: e.body, src: e.code + " " + e.name}))
+        .concat(BODY_POOL.map(b => ({t: b.t, src: "built-in: " + b.name})));
+      if (use){
+        const first = pick(bp); let t = first.t, src = first.src;
+        if (Math.random() < 0.3){ const second = pick(BODY_POOL); if (second.t !== t){ t += ", " + second.t; src += " + " + second.name; } }
+        state.parts.body = t; state.src.body = src;
+      } else { state.parts.body = ""; state.src.body = "none"; }
+      continue;
+    }
+    const e = pick(pool);
+    state.parts[s.k] = e[s.k]; state.src[s.k] = e.code + " " + e.name;
+  }
+  state.title = "True random mix";
+  state.notes = ""; state.lite = false; state.mixable = true; state.gender = g;
+  $("charSel").value = "";
+  refresh();
+}
+
+function rebuildList(){
+  const game = $("fGame").value, g = $("fGender").value, q = $("fSearch").value.trim().toLowerCase();
+  LIST = DB.filter(e => (!game || String(e.part) === game) && (!g || e.gender === g) &&
+    (!q || (e.code + " " + e.name + " " + e.group).toLowerCase().indexOf(q) >= 0));
+  const sel = $("charSel"); sel.innerHTML = "";
+  const first = document.createElement("option"); first.value = ""; first.textContent = "— choose (" + LIST.length + ") —"; sel.appendChild(first);
+  let og = null, key = "";
+  LIST.forEach(e => {
+    const k = e.game + (e.group ? " — " + e.group : "");
+    if (k !== key){ og = document.createElement("optgroup"); og.label = k; sel.appendChild(og); key = k; }
+    const o = document.createElement("option"); o.value = e.code; o.textContent = e.code + "  " + e.name; og.appendChild(o);
+  });
+}
+
+function loadDB(text){
+  const d = parse(text);
+  if (!d.length) return false;
+  DB = d;
+  const fg = $("fGame"), cur = fg.value; fg.innerHTML = "";
+  const all = document.createElement("option"); all.value = ""; all.textContent = "All games (" + DB.length + ")"; fg.appendChild(all);
+  const seen = {};
+  DB.forEach(e => { seen[e.part] = (seen[e.part] || 0) + 1; });
+  Object.keys(seen).sort((a, b) => a - b).forEach(p => {
+    const o = document.createElement("option"); o.value = p; o.textContent = (GAMES[p] || ("Part " + p)) + " (" + seen[p] + ")"; fg.appendChild(o);
+  });
+  if (seen[cur]) fg.value = cur;
+  rebuildList();
+  return true;
+}
+
+function init(){
+  const box = $("slots");
+  SLOTS.forEach(s => {
+    const d = document.createElement("div"); d.className = "slot"; d.id = "slot_" + s.k;
+    d.innerHTML = '<div class="slot-head"><b></b><span class="src"></span>' +
+      '<label><input type="checkbox" id="lock_' + s.k + '"> keep</label>' +
+      '<button type="button" id="re_' + s.k + '" title="Reroll only this section">Reroll</button></div>' +
+      '<textarea id="ta_' + s.k + '" rows="3" spellcheck="false"></textarea>';
+    d.querySelector("b").textContent = s.label;
+    box.appendChild(d);
+    $("ta_" + s.k).addEventListener("input", ev => { state.parts[s.k] = ev.target.value; $("out").value = buildPrompt(); });
+    $("lock_" + s.k).addEventListener("change", ev => { state.locks[s.k] = ev.target.checked; refresh(); });
+    $("re_" + s.k).addEventListener("click", () => mix(s.k));
+  });
+  $("fixed").value = store("pp_fixed") || DEFAULT_FIXED;
+  $("optFixed").checked = store("pp_incfixed") !== "0";
+  $("fixed").addEventListener("input", () => { store("pp_fixed", $("fixed").value); $("out").value = buildPrompt(); });
+  $("btnResetFixed").addEventListener("click", () => { $("fixed").value = DEFAULT_FIXED; store("pp_fixed", DEFAULT_FIXED); $("out").value = buildPrompt(); });
+  $("optFixed").addEventListener("change", () => { store("pp_incfixed", $("optFixed").checked ? "1" : "0"); $("out").value = buildPrompt(); });
+  ["fGame", "fGender"].forEach(id => $(id).addEventListener("change", rebuildList));
+  $("fSearch").addEventListener("input", rebuildList);
+  $("charSel").addEventListener("change", () => { const e = DB.find(x => x.code === $("charSel").value); if (e) setChar(e); });
+  $("btnRandChar").addEventListener("click", () => {
+    if (!LIST.length){ $("msg").textContent = "No characters match the filters."; return; }
+    const e = pick(LIST); $("charSel").value = e.code; setChar(e);
+  });
+  $("btnMix").addEventListener("click", () => mix(null));
+  $("btnCopy").addEventListener("click", () => {
+    const t = $("out").value;
+    const done = () => { $("copied").textContent = "Copied"; };
+    const fallback = () => { $("out").removeAttribute("readonly"); $("out").select(); try { document.execCommand("copy"); done(); } catch(e){ $("copied").textContent = "Press Ctrl+C"; } $("out").setAttribute("readonly", ""); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+  });
+  $("fileIn").addEventListener("change", ev => {
+    const file = ev.target.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => { $("msg").textContent = loadDB(String(r.result)) ? "Loaded " + DB.length + " prompts from " + file.name + "." : "No prompts found in that file."; };
+    r.readAsText(file);
+  });
+  loadDB($("data").textContent);
+  refresh();
+}
+init();
+</script>
+</body>
+</html>
