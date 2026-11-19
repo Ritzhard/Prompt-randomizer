@@ -14,96 +14,111 @@
     --accent:#a878ff; --accent-ink:#14101f; --soft:#2a2440; --field:#17181d; --ok:#56d364; }
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:18px 20px 6px;max-width:1280px;margin:0 auto}
-h1{font-size:22px;margin:0}
-#count{color:var(--muted);font-size:13px}
-main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;padding:10px 20px 40px;max-width:1280px;margin:0 auto;align-items:start}
-@media (max-width:860px){main{grid-template-columns:minmax(0,1fr);padding:10px 16px 40px}header{padding:16px 16px 4px}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 8px}
-h2:first-child{margin-top:0}
-label.f{display:block;font-size:13px;color:var(--muted);margin:8px 0 0}
-select,input[type=search],textarea{width:100%;margin-top:4px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
-textarea{resize:vertical;font:13px/1.45 ui-monospace,Consolas,"Cascadia Mono",monospace}
-button{font:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{display:grid;grid-template-columns:280px minmax(0,1fr);gap:12px;padding:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btnrow{margin-top:10px}
+.btnrow button{padding:7px 6px}
+label.inline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:8px;white-space:nowrap}
+label.inline select{margin-top:0;flex:1;min-width:0;padding:4px 8px}
+button.copy{margin-top:4px;padding:9px 12px}
+button.copy.done{background:var(--ok);border-color:var(--ok)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+h1{font-size:18px;margin:0 0 10px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:6px 0 0}
+select,input[type=search],textarea{width:100%;margin-top:3px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
+textarea{resize:vertical;font:12.5px/1.45 ui-monospace,Consolas,"Cascadia Mono",monospace}
+button{font:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
-.btns{display:grid;gap:8px;margin-top:10px}
-.hint{font-size:12.5px;color:var(--muted);margin:8px 0 0}
-#poolInfo{font-size:13px;margin:10px 0 0}
-#title{font-size:19px;text-transform:none;letter-spacing:0;color:var(--ink);margin:0}
-#meta{color:var(--muted);font-size:13px;margin:2px 0 0}
-#notes{font-size:12.5px;color:var(--muted);margin:6px 0 0;white-space:pre-wrap}
-.slot{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;background:var(--field)}
+.btns{display:grid;gap:6px;margin-top:10px}
+.hint{font-size:12px;color:var(--muted);margin:6px 0 0}
+.phead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;min-height:22px}
+#title{font-size:15px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#notes{font-size:12px;color:var(--muted);margin:0 0 6px;white-space:pre-wrap}
+#notes:empty{display:none}
+.slot{border:1px solid var(--line);border-radius:10px;padding:6px 8px 8px;margin-top:8px;background:var(--field);display:flex;flex-direction:column;min-height:0}
+.slot:first-child{margin-top:0}
 .slot.locked{border-color:var(--accent);background:var(--soft)}
-.slot-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.slot-head b{font-size:13.5px}
-.slot-head .src{color:var(--muted);font-size:12.5px;flex:1;min-width:120px}
-.slot-head label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer}
-.slot-head button{padding:3px 9px;font-size:12.5px}
-.slot textarea{background:var(--panel)}
-#out{min-height:260px}
-.outbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
-#copied{color:var(--ok);font-size:13px}
-.checks{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-top:8px}
+.slot-head{display:flex;align-items:center;gap:8px}
+.slot-head b{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-head .src{display:none}
+.slot-head label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer}
+.slot-head button{padding:2px 9px;font-size:12px}
+.slot textarea{background:var(--panel);margin-top:5px;min-height:56px}
+#out{position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0}
+.outbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+.checks{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin-top:6px}
 .checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
-details{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
-summary{cursor:pointer;font-size:13px;color:var(--muted)}
-#msg{color:#c4320a;font-size:13px;margin:8px 0 0;min-height:1em}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+#msg{color:#c4320a;font-size:12.5px;margin:6px 0 0}
+#msg:empty{display:none}
+
+/* Wide, tall-enough screens: everything on one screen, the text boxes stretch to fill it. */
+@media (min-width:1100px) and (min-height:600px){
+  html,body{height:100%}
+  body{overflow:hidden}
+  main{height:100vh}
+  .panel{display:flex;flex-direction:column;min-height:0}
+  .controls{overflow-y:auto}
+  #slots{flex:1;display:flex;flex-direction:column;min-height:0}
+  .slot{flex:1}
+  .slot textarea{flex:1;resize:none;min-height:0}
+}
+/* Phones: one column. */
+@media (max-width:700px){
+  main{grid-template-columns:minmax(0,1fr);padding:12px 16px}
+}
 </style>
 </head>
 <body>
-<header><h1>Prompt Picker</h1></header>
 <main>
-  <section class="panel">
-    <h2>1. Filter</h2>
-    <label class="f">Game<select id="fGame"></select></label>
-    <label class="f">Gender<select id="fGender">
-      <option value="">Any</option><option value="female">Female</option><option value="male">Male</option><option value="other">Creatures and pairs</option>
-    </select></label>
-    <label class="f">Search<input id="fSearch" type="search"></label>
-
-    <h2>2. Pick</h2>
-    <label class="f">Character<select id="charSel"></select></label>
-    <div class="btns">
-      <button id="btnRandChar" class="primary">Random character</button>
-      <button id="btnMix" class="primary">True random (mix parts)</button>
+  <section class="panel controls">
+    <label class="f" style="margin-top:0">Search<input id="fSearch" type="search"></label>
+    <div class="row2">
+      <label class="f">Game<select id="fGame"></select></label>
+      <label class="f">Gender<select id="fGender">
+        <option value="">Any</option><option value="female">Female</option><option value="male">Male</option><option value="other">Creatures/pairs</option>
+      </select></label>
     </div>
-    <p id="msg"></p>
-    <label class="f">Body features in true random<select id="optBody">
-      <option value="sometimes">Sometimes (50%)</option><option value="always">Always</option><option value="never">Never</option>
+    <label class="f">Character<select id="charSel"></select></label>
+    <div class="row2 btnrow">
+      <button id="btnRandChar" class="primary">Random</button>
+      <button id="btnMix" class="primary">True random</button>
+    </div>
+    <label class="inline">Body in true random<select id="optBody">
+      <option value="sometimes">50%</option><option value="always">Always</option><option value="never">Never</option>
     </select></label>
+    <p id="msg"></p>
+    <div class="btns"><button id="btnCopy" class="primary copy">Copy prompt</button></div>
+    <div class="checks">
+      <label><input type="checkbox" id="optFixed" checked> Include the quality tags</label>
+    </div>
 
     <details>
       <summary>Settings</summary>
-      <label class="f">Fixed first line (never randomized)<textarea id="fixed" rows="9"></textarea></label>
-      <div class="outbar"><button id="btnResetFixed">Reset fixed line</button></div>
-      <label class="f" style="margin-top:14px">Load an updated All_Prompts.txt<input id="fileIn" type="file" accept=".txt" style="margin-top:6px"></label>
-      <p class="hint">Loading a file replaces the built-in prompts until you reload the page.</p>
+      <label class="f">Quality tags (never randomized)<textarea id="fixed" rows="9"></textarea></label>
+      <div class="outbar"><button id="btnResetFixed">Reset quality tags</button></div>
     </details>
   </section>
 
   <section class="panel">
-    <h2 id="title">Pick a character or press a random button</h2>
+    <div class="phead"><p id="title">Pick a character or press a random button</p></div>
     <p id="notes"></p>
     <div id="slots"></div>
-
-    <h2>Prompt</h2>
-    <textarea id="out" readonly spellcheck="false"></textarea>
-    <div class="outbar"><button id="btnCopy" class="primary">Copy prompt</button><span id="copied"></span></div>
-    <div class="checks">
-      <label><input type="checkbox" id="optFixed" checked> Include the fixed first line</label>
-    </div>
   </section>
-</main>
 
-<script id="data" type="text/plain">/*DATA*/</script>
+</main>
+<textarea id="out" readonly tabindex="-1" aria-hidden="true"></textarea>
+
+<script id="data" type="application/json">/*DATA*/</script>
 <script>
 "use strict";
 const DEFAULT_FIXED = "(masterpiece:1.4), (best quality:1.3), (ultra detail:1.3), (8k resolution:1.2), absurdres, highres, sharp focus, skin texture, detailed shading, volumetric lighting, dramatic lighting, depth of field, vibrant colors, aesthetic, studio anime style, anime screencap style, clean lineart, awe-inspiring, amazing quality, ultra-detailed, detailed hair, individual hair strands, beautiful face, intricate face, soft lips, smooth skin, glossy skin, (artist:mazjojo:0.75), (artist:pigeon666:0.70),(artist:zawar379:0.80), (artist:remsrar:0.65),(artist:chimmyming:0.72), (artist:yoneyama mai:0.73), TAxStyle, Pixie_eyelashes, Wada Arco style,";
 const LITE_DROP = ["skin texture", "soft lips", "smooth skin", "glossy skin"];
-const GAMES = {1:"Custom prompts", 2:"Fantasy originals", 3:"Fate/Grand Order", 4:"Genshin Impact", 5:"Honkai: Star Rail", 6:"Epic Seven", 7:"Unicorn Overlord", 8:"Stardew Valley"};
+const GAMES = {1:"Custom prompts", 2:"Fantasy originals", 3:"Fate/Grand Order", 4:"Genshin Impact", 5:"Honkai: Star Rail", 6:"Epic Seven", 7:"Unicorn Overlord", 8:"Stardew Valley", 9:"Honkai Impact 3rd", 10:"Fire Emblem Heroes", 11:"Arknights", 12:"Azur Lane", 13:"Zenless Zone Zero", 14:"Blue Archive", 15:"Uma Musume", 16:"Granblue Fantasy", 17:"Nikke", 18:"Wuthering Waves", 19:"Punishing: Gray Raven", 20:"Reverse: 1999"};
 const SLOTS = [
   {k:"face",    label:"Face, hair, eyes, head accessories"},
   {k:"body",    label:"Body features"},
@@ -161,86 +176,23 @@ function splitTop(s){
   return out;
 }
 
-// Every scene line becomes: (white background, no background), (solo, 1girl/1boy, cowboy shot), body type, colored extremities.
-// Only body-type tags survive; scenery, lighting, props, extra artists and old framing tags are dropped.
-const BODY_RE = /breasts|flat chest|^(adult|mature|young|teenage|old|middle-aged)( (man|woman|women|male|female))?$|^child$|^tall( female)?$|^short$|petite|slender|^slim|^thin$|athletic|muscular|toned|^abs$|curvy|wide hips|thick thighs|chubby|plump|^fat$|stocky|bulky|^round$|^huge$|giantess|masculine|^malet$|broad shoulders|androgynous|otoko no ko|-skinned|^tan$|pale skin|grey skin|^(dark )?elf$|monster|^animal$|robot|mecha musume|creature|^ghost$|^were|beast|horse man|goblin|^witch$|raccoon|bear$|wolf$|chibi|armored rider|^(fe)?male$/;
-function standardScene(raw, gender){
-  const flat = splitTop(raw).flatMap(t => {
-    const inner = t.replace(/^\((.*)\)$/, "$1");
-    return t.startsWith("(") && t.endsWith(")") ? splitTop(inner) : [t];
-  }).map(t => t.trim()).filter(Boolean);
-  const low = flat.map(t => t.toLowerCase().replace(/:[\d.]+$/, ""));
-  const has = w => low.indexOf(w) >= 0;
-  let count;
-  if (has("no humans")) count = "solo, no humans";
-  else if (has("2girls")) count = "2girls";
-  else if (has("2boys")) count = "2boys";
-  else if (has("1boy") && has("1girl")) count = "1boy, 1girl";
-  else if (has("1other")) count = "solo, 1other";
-  else count = "solo, " + (gender === "male" ? "1boy" : "1girl");
-  const body = [], seen = {};
-  flat.forEach((t, i) => {
-    const bare = low[i].replace(/^[a-z .'-]+: /, "");
-    if (BODY_RE.test(bare) && !seen[low[i]]){ seen[low[i]] = 1; body.push(t.replace(/:[\d.]+$/, "")); }
+// The data is prebuilt by build.ps1 as one compact array per character:
+// [code, name, part, group, gender(0 female, 1 male, 2 other), flags(1 short quality line, 2 several people),
+//  tag, face, body, clothes, pose, framing index, body-type tags, notes, extra BREAK lines]
+// The fixed parts of the last section are added back here instead of being stored for every character.
+const COUNTS = ["solo, 1girl", "solo, 1boy", "solo, no humans", "2girls", "2boys", "1boy, 1girl", "solo, 1other"];
+const GENDERS = ["female", "male", "other"];
+function readData(rows){
+  return rows.map(r => {
+    const gender = GENDERS[r[4]], lite = !!(r[5] & 1), multi = !!(r[5] & 2);
+    return {
+      code: r[0], name: r[1], part: r[2], group: r[3], game: GAMES[r[2]] || ("Part " + r[2]),
+      gender, lite, multi, mixable: !lite && !multi && (gender === "male" || gender === "female"),
+      tag: r[6], face: r[7], body: r[8], clothes: r[9], pose: r[10],
+      scene: "(white background, no background), (" + COUNTS[r[11]] + ", cowboy shot), " + (r[12] ? r[12] + ", " : "") + "colored extremities",
+      notes: r[13], extra: r[14]
+    };
   });
-  if (gender === "male" && !body.length) body.push("masculine");
-  return ["(white background, no background)", "(" + count + ", cowboy shot)"].concat(body, ["colored extremities"]).join(", ");
-}
-
-function makeEntry(f, part, partTitle, quality, br, notes){
-  const n = br.length;
-  let sceneRaw = br[n-1];
-  const boy = /\b(1boy|2boys)\b/.test(sceneRaw), girl = /\b(1girl|2girls)\b/.test(sceneRaw);
-  const multi = (boy && girl) || /\b(2girls|2boys)\b/.test(sceneRaw);
-  const gender = (boy && girl) ? "other" : boy ? "male" : girl ? "female" : "other";
-  const cut = sceneRaw.indexOf("Wada Arco style");
-  if (cut >= 0) sceneRaw = sceneRaw.slice(0, cut);
-  const scene = standardScene(sceneRaw, gender);
-
-  let oi = -1;
-  for (let i = 1; i < n - 1; i++) if (br[i].startsWith("(from")) { oi = i; break; }
-  if (oi < 0) oi = Math.min(1, n - 2);
-  let face = br[0], tag = "";
-  if (part >= 3 && face.startsWith("(")){
-    const idx = face.indexOf(":1.1),");
-    if (idx > 0 && idx < 220){ tag = face.slice(0, idx + 6); face = face.slice(idx + 6).trim(); }
-  }
-  const body = br.slice(1, oi).map(trimTail).join(", ");
-  const toks = splitTop(br[oi]); const cam = [];
-  if (toks.length && toks[0].startsWith("(from")) cam.push(toks.shift());
-  while (toks.length && /^(looking |over the shoulder)/.test(toks[0])) cam.push(toks.shift());
-  const clothes = toks.join(", ");
-  const poseLine = (oi + 1 < n - 1) ? trimTail(br[oi + 1]) : "";
-  const pose = cam.concat(poseLine ? [poseLine] : []).join(", ");
-  const extra = (oi + 2 < n - 1) ? br.slice(oi + 2, n - 1).map(trimTail) : [];
-  const lite = quality.indexOf("glossy skin") < 0;
-  return {
-    code:f[0], name:f[1] || "", group:f[2] || "", source:f[3] || "", part, game: GAMES[part] || partTitle || ("Part " + part),
-    notes, tag, face:trimTail(face), body, clothes:trimTail(clothes), pose, extra, scene, lite, gender, multi,
-    mixable: !lite && !multi && (gender === "male" || gender === "female")
-  };
-}
-
-function parse(text){
-  const L = text.split(/\r?\n/), out = []; let part = 0, partTitle = "";
-  for (let i = 0; i < L.length; i++){
-    const pm = L[i].match(/^PART (\d+) \| ([^|]+)/);
-    if (pm){ part = +pm[1]; partTitle = pm[2].trim(); continue; }
-    if (/^={20,}\s*$/.test(L[i]) && i + 1 < L.length && L[i+1].indexOf(" | ") > 0 && !/^[=#\/\s]/.test(L[i+1])){
-      const f = L[i+1].split(" | ").map(s => s.trim());
-      let j = i + 2; const notes = [];
-      while (j < L.length && !/^={20,}\s*$/.test(L[j])){ notes.push(L[j].trim()); j++; }
-      let k = j + 1, q = ""; const br = [];
-      while (k < L.length && L[k].trim() !== ""){
-        if (L[k].startsWith("(masterpiece")) q = L[k];
-        else if (L[k].startsWith("BREAK ")) br.push(L[k].slice(6).trim());
-        k++;
-      }
-      if (br.length >= 3) out.push(makeEntry(f, part, partTitle, q, br, notes.join("\n")));
-      i = k;
-    }
-  }
-  return out;
 }
 
 let DB = [], LIST = [];
@@ -275,7 +227,6 @@ function refresh(){
     $("slot_" + s.k).classList.toggle("locked", !!state.locks[s.k]);
   }
   $("out").value = buildPrompt();
-  $("copied").textContent = "";
 }
 
 function setChar(e){
@@ -346,8 +297,8 @@ function rebuildList(){
   });
 }
 
-function loadDB(text){
-  const d = parse(text);
+function loadDB(rows){
+  const d = readData(rows);
   if (!d.length) return false;
   DB = d;
   const fg = $("fGame"), cur = fg.value; fg.innerHTML = "";
@@ -390,18 +341,15 @@ function init(){
   });
   $("btnMix").addEventListener("click", () => mix(null));
   $("btnCopy").addEventListener("click", () => {
-    const t = $("out").value;
-    const done = () => { $("copied").textContent = "Copied"; };
-    const fallback = () => { $("out").removeAttribute("readonly"); $("out").select(); try { document.execCommand("copy"); done(); } catch(e){ $("copied").textContent = "Press Ctrl+C"; } $("out").setAttribute("readonly", ""); };
+    if (!SLOTS.some(s => (state.parts[s.k] || "").trim())){ $("msg").textContent = "Pick a character first."; return; }
+    $("msg").textContent = "";
+    const t = buildPrompt(); $("out").value = t;
+    const btn = $("btnCopy");
+    const done = () => { btn.textContent = "Copied ✓"; btn.classList.add("done"); clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = "Copy prompt"; btn.classList.remove("done"); }, 1500); };
+    const fallback = () => { $("out").removeAttribute("readonly"); $("out").select(); try { document.execCommand("copy"); done(); } catch(e){ $("msg").textContent = "Copy failed; your browser blocked it."; } $("out").setAttribute("readonly", ""); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
   });
-  $("fileIn").addEventListener("change", ev => {
-    const file = ev.target.files[0]; if (!file) return;
-    const r = new FileReader();
-    r.onload = () => { $("msg").textContent = loadDB(String(r.result)) ? "Loaded " + DB.length + " prompts from " + file.name + "." : "No prompts found in that file."; };
-    r.readAsText(file);
-  });
-  loadDB($("data").textContent);
+  loadDB(JSON.parse($("data").textContent));
   refresh();
 }
 init();
