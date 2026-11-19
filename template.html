@@ -99,6 +99,7 @@ summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
     <div class="btns"><button id="btnCopy" class="primary copy">Copy prompt</button></div>
     <div class="checks">
       <label><input type="checkbox" id="optFixed" checked> Include the quality tags</label>
+      <label title="Off: the more creative, descriptive wording"><input type="checkbox" id="optDanbooru" checked> Danbooru tags only</label>
     </div>
 
     <details>
@@ -130,8 +131,39 @@ const SLOTS = [
   {k:"pose",    label:"Camera, pose and action"},
   {k:"scene",   label:"Setting, framing and body type"}
 ];
-// Extra body-feature bundles for true random, so this section works for every gender and game.
+// Extra body-feature bundles for true random, so this section works for every gender and game (Danbooru tags only).
 const BODY_POOL = [
+  {name:"Scars", t:"(scar, scar on chest, scar on arm, scar on face)"},
+  {name:"Tribal tattoos", t:"(tattoo, tribal, arm tattoo, shoulder tattoo)"},
+  {name:"Glowing runes", t:"(glowing tattoo, runes, glowing)"},
+  {name:"Dragon scales", t:"(scales, claws)"},
+  {name:"Dragon tail", t:"(dragon tail, scales)"},
+  {name:"Bat wings", t:"(bat wings, demon wings, black wings)"},
+  {name:"Feathered wings", t:"(white wings, angel wings, feathered wings, large wings, falling feathers)"},
+  {name:"Black feathered wings", t:"(black wings, feathered wings, black feathers)"},
+  {name:"Demon tail", t:"(demon tail)"},
+  {name:"Fox tails", t:"(fox tail, multiple tails)"},
+  {name:"Cat tail", t:"(cat tail, tail raised)"},
+  {name:"Wolf tail", t:"(wolf tail)"},
+  {name:"Stitches", t:"(stitches, patchwork skin, two-tone skin)"},
+  {name:"Extra eyes", t:"(extra eyes, third eye, body horror)"},
+  {name:"Prosthetic arm", t:"(prosthetic arm, mechanical arms, mechanical hands)"},
+  {name:"Doll joints", t:"(doll joints, joints)"},
+  {name:"Crystal growths", t:"(crystal, glowing)"},
+  {name:"Burn scars", t:"(burn scar, cracked skin, embers)"},
+  {name:"Cursed arm", t:"(cracked skin, veins, glowing, dark aura)"},
+  {name:"Bandages", t:"(bandages, bandaged arm, bandaged hand)"},
+  {name:"Freckles", t:"(freckles, tan, tanlines)"},
+  {name:"Body chains", t:"(chain, shackles, cuffs)"},
+  {name:"Plant growth", t:"(vines, leaf, flower)"},
+  {name:"Fins", t:"(head fins, fins, webbed hands, scales)"},
+  {name:"Ghostly", t:"(see-through body, transparent, glowing)"},
+  {name:"Insect wings", t:"(insect wings, butterfly wings)"},
+  {name:"Third eye", t:"(third eye, forehead mark)"},
+  {name:"Muscles", t:"(muscular, abs, veins, broad shoulders)"}
+];
+// The same bundles in the creative, descriptive wording (same order as BODY_POOL).
+const BODY_POOL_CREATIVE = [
   {name:"Scars", t:"(scars, scar across chest, scar on arm, old battle scars, healed wounds)"},
   {name:"Tribal tattoos", t:"(tribal tattoo, arm tattoo, shoulder tattoo, black ink markings, linework tattoo)"},
   {name:"Glowing runes", t:"(glowing runes on skin, glowing tattoo, magic circuit lines, blue glowing markings)"},
@@ -183,26 +215,61 @@ function splitTop(s){
 // The data is prebuilt by build.ps1 as one compact array per character:
 // [code, name, part, group, gender(0 female, 1 male, 2 other), flags(1 short quality line, 2 several people),
 //  tag, face, body, clothes, pose, framing index, body-type tags, notes, extra BREAK lines,
-//  official alternate outfits as [name, clothes, pose or "" to keep the default pose]]
+//  official alternate outfits as [name, clothes, pose or "" to keep the default pose],
+//  creative version: [face, body, clothes, pose, body-type tags, extra BREAK lines, outfits as [clothes, pose]]]
+// Fields 7-15 are in Danbooru tags only; the creative version keeps the descriptive wording.
 // The fixed parts of the last section are added back here instead of being stored for every character.
 const COUNTS = ["solo, 1girl", "solo, 1boy", "solo, no humans", "2girls", "2boys", "1boy, 1girl", "solo, 1other"];
 const GENDERS = ["female", "male", "other"];
 function readData(rows){
   return rows.map(r => {
-    const gender = GENDERS[r[4]], lite = !!(r[5] & 1), multi = !!(r[5] & 2);
+    const gender = GENDERS[r[4]], lite = !!(r[5] & 1), multi = !!(r[5] & 2), c = r[16];
     return {
       code: r[0], name: r[1], part: r[2], group: r[3], game: GAMES[r[2]] || ("Part " + r[2]),
       gender, lite, multi, mixable: !lite && !multi && (gender === "male" || gender === "female"),
-      tag: r[6], face: r[7], body: r[8], clothes: r[9], pose: r[10],
-      scene: "(white background, no background), (" + COUNTS[r[11]] + ", cowboy shot), " + (r[12] ? r[12] + ", " : "") + "colored extremities",
-      notes: r[13], extra: r[14],
-      outfits: (r[15] || []).map(o => ({name: o[0], clothes: o[1], pose: o[2]}))
+      tag: r[6], face: r[7], body: r[8], clothes: r[9], pose: r[10], cnt: r[11], bt: r[12],
+      notes: r[13], extra: r[14] || [],
+      outfits: (r[15] || []).map(o => ({name: o[0], clothes: o[1], pose: o[2]})),
+      cre: c ? {face: c[0], body: c[1], clothes: c[2], pose: c[3], bt: c[4], extra: c[5] || [],
+                outfits: (c[6] || []).map(o => ({clothes: o[0], pose: o[1]}))} : null
     };
   });
 }
 
 let DB = [], LIST = [];
-const state = {title:"", meta:"", notes:"", lite:false, mixable:false, gender:"", parts:{}, src:{}, locks:{}};
+// srcs: where each section came from, so the Danbooru / creative switch can redraw it.
+const state = {title:"", meta:"", notes:"", lite:false, mixable:false, gender:"", parts:{}, srcs:{}, locks:{}};
+
+// "Danbooru tags only" on: the Danbooru version; off: the creative wording (character tags stay the Danbooru ones).
+const danbooru = () => $("optDanbooru").checked;
+const ver = e => (!danbooru() && e.cre) ? e.cre : e;
+const bodyPool = () => danbooru() ? BODY_POOL : BODY_POOL_CREATIVE;
+function sceneOf(e){
+  const v = ver(e);
+  return (danbooru() ? "(white background, simple background)" : "(white background, no background)") +
+    ", (" + COUNTS[e.cnt] + ", cowboy shot), " + (v.bt ? v.bt + ", " : "") + "colored extremities";
+}
+// A section from its source: {e, n, full} = character e in outfit n (full: with its character tag and extra lines);
+// for the body, {e} and/or {pi, pi2} = built-in body bundles; null = left empty.
+function render(k, s){
+  if (!s) return "";
+  if (k === "body"){
+    const P = bodyPool();
+    let t = s.e ? ver(s.e).body : (s.pi != null ? P[s.pi].t : "");
+    if (s.pi2 != null) t += (t ? ", " : "") + P[s.pi2].t;
+    return t;
+  }
+  const e = s.e;
+  if (k === "face") return (s.full && e.tag ? e.tag + " " : "") + ver(e).face;
+  if (k === "clothes") return outfitParts(e, s.n || 0).clothes;
+  if (k === "pose") return s.full ? outfitParts(e, s.n || 0).pose : ver(e).pose;
+  if (k === "scene") return sceneOf(e);
+  return "";
+}
+function restyle(){
+  for (const s of SLOTS) if (s.k in state.srcs) state.parts[s.k] = render(s.k, state.srcs[s.k]);
+  refresh();
+}
 
 function store(key, val){ try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch(e){ return null; } }
 function fixedLine(){ return $("fixed").value.replace(/\s*\n\s*/g, " ").trim() || DEFAULT_FIXED; }
@@ -237,10 +304,11 @@ function refresh(){
 
 // Outfit 0 is the standard outfit; 1..n are the official alternates.
 function outfitParts(e, n){
-  const o = n > 0 ? e.outfits[n - 1] : null;
+  const v = ver(e);
+  const o = n > 0 ? v.outfits[n - 1] : null;
   return {
-    clothes: o ? o.clothes : e.clothes,
-    pose: (o && o.pose ? o.pose : e.pose) + e.extra.map(x => ",\nBREAK " + x).join("")
+    clothes: o ? o.clothes : v.clothes,
+    pose: (o && o.pose ? o.pose : v.pose) + v.extra.map(x => ",\nBREAK " + x).join("")
   };
 }
 function fillOutfits(e, n){
@@ -253,12 +321,9 @@ function fillOutfits(e, n){
 }
 function setChar(e, n){
   n = n || 0;
-  const op = outfitParts(e, n);
-  state.parts = {
-    face: (e.tag ? e.tag + " " : "") + e.face,
-    body: e.body, clothes: op.clothes, pose: op.pose,
-    scene: e.scene
-  };
+  state.srcs = {face: {e, full: true}, body: {e}, clothes: {e, n}, pose: {e, n, full: true}, scene: {e}};
+  state.parts = {};
+  for (const s of SLOTS) state.parts[s.k] = render(s.k, state.srcs[s.k]);
   state.locks = {};
   state.cur = e; state.outfit = n;
   state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
@@ -271,8 +336,8 @@ function setChar(e, n){
 // Switching outfit only changes the clothes (and the pose, when the outfit has its own); other edits stay.
 function setOutfit(n){
   const e = state.cur; if (!e) return;
-  const op = outfitParts(e, n);
-  state.parts.clothes = op.clothes; state.parts.pose = op.pose; state.outfit = n;
+  state.srcs.clothes = {e, n}; state.srcs.pose = {e, n, full: true};
+  state.parts.clothes = render("clothes", state.srcs.clothes); state.parts.pose = render("pose", state.srcs.pose); state.outfit = n;
   state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
   refresh();
 }
@@ -288,26 +353,26 @@ function mix(only){
   if (!pool.length){ $("msg").textContent = g ? "No " + g + " characters to mix in this game." : "Nothing in this game can be mixed."; return; }
   const anyLock = SLOTS.some(s => state.locks[s.k]);
   const keep = state.mixable && (!!only || anyLock);
-  if (!keep){ state.locks = {}; only = null; state.parts = {}; state.src = {}; }
+  if (!keep){ state.locks = {}; only = null; state.parts = {}; state.srcs = {}; }
   for (const s of SLOTS){
     if (only && s.k !== only) continue;
     if (!only && state.locks[s.k]) continue;
     if (s.k === "body"){
       const mode = $("optBody").value;
       const use = only ? mode !== "never" : (mode === "always" || (mode === "sometimes" && Math.random() < 0.5));
-      const bp = pool.filter(e => e.body)
-        .map(e => ({t: e.body, src: e.code + " " + e.name}))
-        .concat(BODY_POOL.map(b => ({t: b.t, src: "built-in: " + b.name})));
+      const P = bodyPool();
+      const bp = pool.filter(e => ver(e).body).map(e => ({e})).concat(P.map((b, i) => ({pi: i})));
       if (use){
-        const first = pick(bp); let t = first.t, src = first.src;
-        if (Math.random() < 0.3){ const second = pick(BODY_POOL); if (second.t !== t){ t += ", " + second.t; src += " + " + second.name; } }
-        state.parts.body = t; state.src.body = src;
-      } else { state.parts.body = ""; state.src.body = "none"; }
+        const first = pick(bp), src = {e: first.e, pi: first.pi};
+        if (Math.random() < 0.3){ const i2 = Math.floor(Math.random() * P.length); if (first.pi !== i2) src.pi2 = i2; }
+        state.srcs.body = src;
+      } else state.srcs.body = null;
+      state.parts.body = render("body", state.srcs.body);
       continue;
     }
     const e = pick(pool);
-    state.parts[s.k] = s.k === "clothes" ? outfitParts(e, randomOutfit(e)).clothes : e[s.k];
-    state.src[s.k] = e.code + " " + e.name;
+    state.srcs[s.k] = s.k === "clothes" ? {e, n: randomOutfit(e)} : {e};
+    state.parts[s.k] = render(s.k, state.srcs[s.k]);
   }
   state.title = "True random mix";
   state.notes = ""; state.lite = false; state.mixable = true; state.gender = g; state.cur = null; state.outfit = 0;
@@ -320,10 +385,10 @@ function rebuildList(){
   LIST = DB.filter(e => (!game || String(e.part) === game) && (!g || e.gender === g) &&
     (!q || (e.code + " " + e.name + " " + e.group).toLowerCase().indexOf(q) >= 0));
   const sel = $("charSel"); sel.innerHTML = "";
-  const first = document.createElement("option"); first.value = ""; first.textContent = "— choose (" + LIST.length + ") —"; sel.appendChild(first);
+  const first = document.createElement("option"); first.value = ""; first.textContent = "Choose a character (" + LIST.length + ")"; sel.appendChild(first);
   let og = null, key = "";
   LIST.forEach(e => {
-    const k = e.game + (e.group ? " — " + e.group : "");
+    const k = e.game + (e.group ? " (" + e.group + ")" : "");
     if (k !== key){ og = document.createElement("optgroup"); og.label = k; sel.appendChild(og); key = k; }
     const o = document.createElement("option"); o.value = e.code; o.textContent = e.code + "  " + e.name; og.appendChild(o);
   });
@@ -364,6 +429,8 @@ function init(){
   $("fixed").addEventListener("input", () => { store("pp_fixed", $("fixed").value); $("out").value = buildPrompt(); });
   $("btnResetFixed").addEventListener("click", () => { $("fixed").value = DEFAULT_FIXED; store("pp_fixed", DEFAULT_FIXED); $("out").value = buildPrompt(); });
   $("optFixed").addEventListener("change", () => { store("pp_incfixed", $("optFixed").checked ? "1" : "0"); $("out").value = buildPrompt(); });
+  $("optDanbooru").checked = store("pp_danbooru") !== "0";
+  $("optDanbooru").addEventListener("change", () => { store("pp_danbooru", $("optDanbooru").checked ? "1" : "0"); restyle(); });
   ["fGame", "fGender"].forEach(id => $(id).addEventListener("change", rebuildList));
   $("fSearch").addEventListener("input", rebuildList);
   $("charSel").addEventListener("change", () => { const e = DB.find(x => x.code === $("charSel").value); if (e) setChar(e, 0); });
