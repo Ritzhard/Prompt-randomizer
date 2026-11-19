@@ -84,12 +84,16 @@ summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
       </select></label>
     </div>
     <label class="f">Character<select id="charSel"></select></label>
+    <label class="f">Outfit<select id="outfitSel" disabled><option value="0">Default outfit</option></select></label>
     <div class="row2 btnrow">
       <button id="btnRandChar" class="primary">Random</button>
       <button id="btnMix" class="primary">True random</button>
     </div>
     <label class="inline">Body in true random<select id="optBody">
       <option value="sometimes">50%</option><option value="always">Always</option><option value="never">Never</option>
+    </select></label>
+    <label class="inline">Outfits in random<select id="optOutfits">
+      <option value="default">Default only</option><option value="any">Any official</option>
     </select></label>
     <p id="msg"></p>
     <div class="btns"><button id="btnCopy" class="primary copy">Copy prompt</button></div>
@@ -178,7 +182,8 @@ function splitTop(s){
 
 // The data is prebuilt by build.ps1 as one compact array per character:
 // [code, name, part, group, gender(0 female, 1 male, 2 other), flags(1 short quality line, 2 several people),
-//  tag, face, body, clothes, pose, framing index, body-type tags, notes, extra BREAK lines]
+//  tag, face, body, clothes, pose, framing index, body-type tags, notes, extra BREAK lines,
+//  official alternate outfits as [name, clothes, pose or "" to keep the default pose]]
 // The fixed parts of the last section are added back here instead of being stored for every character.
 const COUNTS = ["solo, 1girl", "solo, 1boy", "solo, no humans", "2girls", "2boys", "1boy, 1girl", "solo, 1other"];
 const GENDERS = ["female", "male", "other"];
@@ -190,7 +195,8 @@ function readData(rows){
       gender, lite, multi, mixable: !lite && !multi && (gender === "male" || gender === "female"),
       tag: r[6], face: r[7], body: r[8], clothes: r[9], pose: r[10],
       scene: "(white background, no background), (" + COUNTS[r[11]] + ", cowboy shot), " + (r[12] ? r[12] + ", " : "") + "colored extremities",
-      notes: r[13], extra: r[14]
+      notes: r[13], extra: r[14],
+      outfits: (r[15] || []).map(o => ({name: o[0], clothes: o[1], pose: o[2]}))
     };
   });
 }
@@ -229,23 +235,48 @@ function refresh(){
   $("out").value = buildPrompt();
 }
 
-function setChar(e){
-  const label = e.code + " " + e.name;
+// Outfit 0 is the standard outfit; 1..n are the official alternates.
+function outfitParts(e, n){
+  const o = n > 0 ? e.outfits[n - 1] : null;
+  return {
+    clothes: o ? o.clothes : e.clothes,
+    pose: (o && o.pose ? o.pose : e.pose) + e.extra.map(x => ",\nBREAK " + x).join("")
+  };
+}
+function fillOutfits(e, n){
+  const sel = $("outfitSel"); sel.innerHTML = "";
+  const add = (v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
+  add(0, "Default outfit");
+  if (e) e.outfits.forEach((o, i) => add(i + 1, o.name));
+  sel.disabled = !e || !e.outfits.length;
+  sel.value = String(n || 0);
+}
+function setChar(e, n){
+  n = n || 0;
+  const op = outfitParts(e, n);
   state.parts = {
     face: (e.tag ? e.tag + " " : "") + e.face,
-    body: e.body, clothes: e.clothes,
-    pose: e.pose + e.extra.map(x => ",\nBREAK " + x).join(""),
+    body: e.body, clothes: op.clothes, pose: op.pose,
     scene: e.scene
   };
-  state.src = {}; for (const s of SLOTS) state.src[s.k] = state.parts[s.k] ? label : "none";
   state.locks = {};
-  state.title = e.code + " · " + e.name;
-  state.meta = [e.game, e.group, e.source].filter(Boolean).join(" · ");
+  state.cur = e; state.outfit = n;
+  state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
   state.notes = e.notes;
   state.lite = e.lite; state.mixable = e.mixable; state.gender = e.gender;
+  fillOutfits(e, n);
   $("msg").textContent = "";
   refresh();
 }
+// Switching outfit only changes the clothes (and the pose, when the outfit has its own); other edits stay.
+function setOutfit(n){
+  const e = state.cur; if (!e) return;
+  const op = outfitParts(e, n);
+  state.parts.clothes = op.clothes; state.parts.pose = op.pose; state.outfit = n;
+  state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
+  refresh();
+}
+const randomOutfit = e => ($("optOutfits").value === "any" && e.outfits.length) ? Math.floor(Math.random() * (e.outfits.length + 1)) : 0;
 
 function mix(only){
   const game = $("fGame").value, fg = $("fGender").value;
@@ -275,11 +306,12 @@ function mix(only){
       continue;
     }
     const e = pick(pool);
-    state.parts[s.k] = e[s.k]; state.src[s.k] = e.code + " " + e.name;
+    state.parts[s.k] = s.k === "clothes" ? outfitParts(e, randomOutfit(e)).clothes : e[s.k];
+    state.src[s.k] = e.code + " " + e.name;
   }
   state.title = "True random mix";
-  state.notes = ""; state.lite = false; state.mixable = true; state.gender = g;
-  $("charSel").value = "";
+  state.notes = ""; state.lite = false; state.mixable = true; state.gender = g; state.cur = null; state.outfit = 0;
+  $("charSel").value = ""; fillOutfits(null, 0);
   refresh();
 }
 
@@ -334,10 +366,13 @@ function init(){
   $("optFixed").addEventListener("change", () => { store("pp_incfixed", $("optFixed").checked ? "1" : "0"); $("out").value = buildPrompt(); });
   ["fGame", "fGender"].forEach(id => $(id).addEventListener("change", rebuildList));
   $("fSearch").addEventListener("input", rebuildList);
-  $("charSel").addEventListener("change", () => { const e = DB.find(x => x.code === $("charSel").value); if (e) setChar(e); });
+  $("charSel").addEventListener("change", () => { const e = DB.find(x => x.code === $("charSel").value); if (e) setChar(e, 0); });
+  $("outfitSel").addEventListener("change", () => setOutfit(+$("outfitSel").value));
+  $("optOutfits").value = store("pp_outfits") === "any" ? "any" : "default";
+  $("optOutfits").addEventListener("change", () => store("pp_outfits", $("optOutfits").value));
   $("btnRandChar").addEventListener("click", () => {
     if (!LIST.length){ $("msg").textContent = "No characters match the filters."; return; }
-    const e = pick(LIST); $("charSel").value = e.code; setChar(e);
+    const e = pick(LIST); $("charSel").value = e.code; setChar(e, randomOutfit(e));
   });
   $("btnMix").addEventListener("click", () => mix(null));
   $("btnCopy").addEventListener("click", () => {
