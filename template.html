@@ -22,9 +22,22 @@ main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;padding:12p
 label.inline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:7px;white-space:nowrap}
 label.inline select{margin-top:0;flex:1;min-width:0;padding:4px 8px}
 button.copy.done{background:var(--ok);border-color:var(--ok)}
-.qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
-.qhead button{padding:2px 9px;font-size:12px}
-#fixed{margin-top:5px}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.qhead button,.qfoot button{padding:2px 9px;font-size:12px}
+.tabs{display:flex;gap:4px}
+.tabs button.tab{padding:2px 10px;font-size:12.5px;border-radius:999px;background:transparent;color:var(--muted)}
+.tabs button.tab.on{background:var(--soft);border-color:var(--accent);color:var(--ink)}
+textarea.box{margin-top:5px}
+.qfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;margin-top:3px}
+.tok{font-size:11.5px;color:var(--muted);white-space:nowrap;cursor:help}
+.tok.over{color:#c4320a}
+.badge{flex:none;font-size:11px;line-height:1.7;padding:0 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);cursor:help}
+.tools{flex:none;display:flex;align-items:center;gap:6px}
+.tools button{padding:3px 10px;font-size:12.5px}
+.tools select{width:auto;max-width:210px;margin:0;padding:3px 8px;font-size:12.5px}
+button:disabled{opacity:.5;cursor:default}
+button:disabled:hover{border-color:var(--line)}
+[hidden]{display:none!important}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
 h1{font-size:18px;margin:0 0 10px}
 h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}
@@ -36,8 +49,9 @@ button{font:inherit;border:1px solid var(--line);background:var(--field);color:v
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .hint{font-size:12px;color:var(--muted);margin:6px 0 0}
-.phead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;min-height:22px}
-#title{font-size:15px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phead{display:flex;align-items:center;gap:8px;margin-bottom:8px;min-height:26px}
+#title{flex:0 1 auto;min-width:0;font-size:15px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phead .tools{margin-left:auto}
 #notes{font-size:12px;color:var(--muted);margin:0 0 6px;white-space:pre-wrap}
 #notes:empty{display:none}
 .slot{border:1px solid var(--line);border-radius:10px;padding:6px 8px 8px;margin-top:8px;background:var(--field);display:flex;flex-direction:column;min-height:0}
@@ -46,11 +60,11 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .slot-head{display:flex;align-items:center;gap:8px}
 .slot-head b{font-size:13px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slot-head .src{display:none}
+.slot-head .tok{margin-right:2px}
 .slot-head label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer}
 .slot-head button{padding:2px 9px;font-size:12px}
 .slot textarea{background:var(--panel);margin-top:5px;min-height:56px}
 #out{position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0}
-.outbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
 .checks{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:12.5px;margin-top:8px}
 .checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
 #msg{color:#c4320a;font-size:12.5px;margin:6px 0 0}
@@ -64,7 +78,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
   main{height:100vh}
   .panel{display:flex;flex-direction:column;min-height:0}
   .controls{overflow-y:auto}
-  .controls #fixed{flex:1 1 auto;min-height:64px;resize:none}
+  .controls textarea.box{flex:1 1 auto;min-height:64px;resize:none}
   #slots{flex:1;display:flex;flex-direction:column;min-height:0}
   .slot{flex:1}
   .slot textarea{flex:1;resize:none;min-height:0}
@@ -72,13 +86,14 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 /* Phones: one column. */
 @media (max-width:700px){
   main{grid-template-columns:minmax(0,1fr);padding:12px 16px}
+  .phead{flex-wrap:wrap}
 }
 </style>
 </head>
 <body>
 <main>
   <section class="panel controls">
-    <label class="f" style="margin-top:0">Search<input id="fSearch" type="search"></label>
+    <label class="f" style="margin-top:0" title="A name, a game, or looks. Separate looks with commas: white hair, glasses">Search<input id="fSearch" type="search" placeholder="Name or looks: white hair, glasses"></label>
     <div class="row2">
       <label class="f">Game<select id="fGame"></select></label>
       <label class="f">Gender<select id="fGender">
@@ -103,12 +118,31 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
       <label><input type="checkbox" id="optFixed" checked> Include the quality tags</label>
       <label title="Off: the more creative, descriptive wording"><input type="checkbox" id="optDanbooru" checked> Danbooru tags only</label>
     </div>
-    <div class="qhead"><label for="fixed">Quality tags (never randomized)</label><button type="button" id="btnResetFixed" title="Put the original quality tags back">Reset</button></div>
-    <textarea id="fixed" rows="6" spellcheck="false"></textarea>
+    <div class="qhead">
+      <div class="tabs">
+        <button type="button" class="tab on" id="tabFixed" title="Quality tags: added at the start of every copied prompt, never randomized">Quality tags</button>
+        <button type="button" class="tab" id="tabNeg" title="Negative prompt: for the negative box of your image tool">Negative</button>
+      </div>
+      <button type="button" id="btnResetBox" title="Put the original text back">Reset</button>
+    </div>
+    <textarea id="fixed" class="box" rows="6" spellcheck="false" aria-label="Quality tags"></textarea>
+    <textarea id="neg" class="box" rows="6" spellcheck="false" aria-label="Negative prompt" hidden></textarea>
+    <div class="qfoot">
+      <span id="boxTok" class="tok" title="About how many tokens this box uses; every 75 tokens is one chunk"></span>
+      <button type="button" id="btnCopyNeg" class="copy" title="Copies the negative prompt. Teen characters also get nsfw." hidden>Copy negative</button>
+    </div>
   </section>
 
   <section class="panel">
-    <div class="phead"><p id="title">Pick a character or press a random button</p></div>
+    <div class="phead">
+      <p id="title">Pick a character or press a random button</p>
+      <span id="sure" class="badge" title="Written with less certainty: some design details may be off" hidden>less sure</span>
+      <div class="tools">
+        <button type="button" id="btnBack" title="Go back to the previous prompt" disabled>Back</button>
+        <button type="button" id="btnFav" title="Save this prompt in this browser" disabled>☆ Save</button>
+        <select id="favSel" title="Prompts you saved in this browser"></select>
+      </div>
+    </div>
     <p id="notes"></p>
     <div id="slots"></div>
   </section>
@@ -213,7 +247,7 @@ function splitTop(s){
 }
 
 // The data is prebuilt by build.ps1 as one compact array per character:
-// [code, name, part, group, gender(0 female, 1 male, 2 other), flags(1 short quality line, 2 several people),
+// [code, name, part, group, gender(0 female, 1 male, 2 other), flags(1 short quality line, 2 several people, 4 less sure),
 //  tag, face, body, clothes, pose, framing index, body-type tags, notes, extra BREAK lines,
 //  official alternate outfits as [name, clothes, pose or "" to keep the default pose],
 //  creative version: [face, body, clothes, pose, body-type tags, extra BREAK lines, outfits as [clothes, pose]]]
@@ -223,10 +257,10 @@ const COUNTS = ["solo, 1girl", "solo, 1boy", "solo, no humans", "2girls", "2boys
 const GENDERS = ["female", "male", "other"];
 function readData(rows){
   return rows.map(r => {
-    const gender = GENDERS[r[4]], lite = !!(r[5] & 1), multi = !!(r[5] & 2), c = r[16];
+    const gender = GENDERS[r[4]], lite = !!(r[5] & 1), multi = !!(r[5] & 2), less = !!(r[5] & 4), c = r[16];
     return {
       code: r[0], name: r[1], part: r[2], group: r[3], game: GAMES[r[2]] || ("Part " + r[2]),
-      gender, lite, multi, mixable: !lite && !multi && (gender === "male" || gender === "female"),
+      gender, lite, multi, less, mixable: !lite && !multi && (gender === "male" || gender === "female"),
       tag: r[6], face: r[7], body: r[8], clothes: r[9], pose: r[10], cnt: r[11], bt: r[12],
       notes: r[13], extra: r[14] || [],
       outfits: (r[15] || []).map(o => ({name: o[0], clothes: o[1], pose: o[2]})),
@@ -238,7 +272,8 @@ function readData(rows){
 
 let DB = [], LIST = [];
 // srcs: where each section came from, so the Danbooru / creative switch can redraw it.
-const state = {title:"", meta:"", notes:"", lite:false, mixable:false, gender:"", parts:{}, srcs:{}, locks:{}};
+// cur/outfit: the character and outfit shown (cur is null for a true random mix); favId: the saved mix shown, if any.
+const state = {title:"", meta:"", notes:"", lite:false, mixable:false, gender:"", parts:{}, srcs:{}, locks:{}, cur:null, outfit:0, favId:null};
 
 // "Danbooru tags only" on: the Danbooru version; off: the creative wording (character tags stay the Danbooru ones).
 const danbooru = () => $("optDanbooru").checked;
@@ -273,6 +308,30 @@ function restyle(){
 
 function store(key, val){ try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch(e){ return null; } }
 function fixedLine(){ return $("fixed").value.replace(/\s*\n\s*/g, " ").trim() || DEFAULT_FIXED; }
+// The negative prompt is copied on its own; for teen characters it always includes nsfw.
+const DEFAULT_NEG = "(worst quality, low quality:1.4), lowres, bad anatomy, bad hands, missing fingers, extra fingers, fewer digits, extra digits, cropped, jpeg artifacts, blurry, signature, watermark, username, artist name, text, error";
+function negLine(){
+  let n = $("neg").value.replace(/\s*\n\s*/g, " ").trim() || DEFAULT_NEG;
+  if (state.lite && !/(^|[,(\s])nsfw\s*(,|$|:)/i.test(n)) n = "nsfw, " + n;
+  return n;
+}
+
+// About how many CLIP tokens a text uses. Emphasis brackets and weights are not tokens; escaped brackets are.
+// Every 75 tokens is one chunk; a section past 75 spills into another chunk and its late tags pull less weight.
+function tokenCount(t){
+  const s = t.replace(/\\[()]/g, " # ").replace(/:\s*-?\d*\.?\d+\s*\)/g, ")").replace(/[()]/g, " ");
+  const m = s.match(/[a-z]+|\d|[^\sa-z\d]/gi) || [];
+  return m.reduce((n, w) => n + (w.length > 8 && /^[a-z]+$/i.test(w) ? 2 : 1), 0);
+}
+function tokInfo(t){
+  const parts = (t || "").split(/\bBREAK\b/).map(tokenCount).filter(n => n > 0);
+  return {total: parts.reduce((a, b) => a + b, 0), chunks: parts.reduce((a, n) => a + Math.ceil(n / 75), 0), over: parts.some(n => n > 75)};
+}
+function showTok(el, t){
+  const i = tokInfo(t);
+  el.textContent = i.total ? "~" + i.total + " tokens" + (i.chunks > 1 ? ", " + i.chunks + " chunks" : "") : "";
+  el.classList.toggle("over", i.over);
+}
 
 function buildPrompt(){
   const lines = [];
@@ -290,16 +349,26 @@ function buildPrompt(){
   return lines.join("\n");
 }
 
+const hasPrompt = () => SLOTS.some(s => (state.parts[s.k] || "").trim());
 function refresh(){
   $("title").textContent = state.title || "Pick a character or press a random button";
+  $("title").title = state.title || "";
   $("notes").textContent = state.notes;
+  $("sure").hidden = !(state.cur && state.cur.less);
   for (const s of SLOTS){
     const ta = $("ta_" + s.k);
     if (ta.value !== (state.parts[s.k] || "")) ta.value = state.parts[s.k] || "";
     $("lock_" + s.k).checked = !!state.locks[s.k];
     $("slot_" + s.k).classList.toggle("locked", !!state.locks[s.k]);
+    showTok($("tok_" + s.k), state.parts[s.k]);
   }
   $("out").value = buildPrompt();
+  $("btnBack").disabled = !HIST.length;
+  const saved = favs().some(f => f.id === favId());
+  $("btnFav").disabled = !hasPrompt();
+  $("btnFav").textContent = saved ? "★ Saved" : "☆ Save";
+  $("btnFav").title = saved ? "Saved in this browser; click to remove it" : "Save this prompt in this browser";
+  updateHash();
 }
 
 // Outfit 0 is the standard outfit; 1..n are the official alternates.
@@ -313,8 +382,10 @@ function outfitParts(e, n){
 }
 // Character e in outfit n (0 = default). The Character list holds the default outfits and the Outfit list
 // holds every official alternate outfit as its own entry; picking from one list clears the other.
-function setChar(e, n){
+function setChar(e, n, quiet){
   n = n || 0;
+  if (!quiet) pushHist();
+  state.favId = null;
   state.srcs = {face: {e, full: true}, body: {e}, clothes: {e, n}, pose: {e, n, full: true}, scene: {e}};
   state.parts = {};
   for (const s of SLOTS) state.parts[s.k] = render(s.k, state.srcs[s.k]);
@@ -338,6 +409,7 @@ function mix(only){
   const g = fg;
   const pool = DB.filter(e => e.mixable && (!game || String(e.part) === game) && (!g || e.gender === g));
   if (!pool.length){ $("msg").textContent = g ? "No " + g + " characters to mix in this game." : "Nothing in this game can be mixed."; return; }
+  pushHist(); state.favId = null;
   const anyLock = SLOTS.some(s => state.locks[s.k]);
   const keep = state.mixable && (!!only || anyLock);
   if (!keep){ state.locks = {}; only = null; state.parts = {}; state.srcs = {}; }
@@ -382,21 +454,113 @@ function fillSelect(sel, label, items){
   sel.disabled = !items.length;
 }
 let OLIST = [];   // [{e, n}]: the official alternate outfits that match the filters
+// Search: each comma-separated term must match. A term matches part of a code, name, group, game or outfit name,
+// or a whole word or phrase in the tags (either version), so "fox ears" or "glasses" finds looks.
+const lowKey = s => (s || "").toLowerCase().replace(/\\/g, "");
+function searchTerms(q){
+  return q.toLowerCase().split(",").map(t => t.trim()).filter(Boolean)
+    .map(t => ({t, re: new RegExp("(^|[^a-z0-9])" + t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^a-z0-9])")}));
+}
+const matches = (terms, name, look) => terms.every(x => name.indexOf(x.t) >= 0 || x.re.test(look));
+function indexLooks(e){
+  const look = v => v ? [v.face, v.body, v.pose, v.bt].join(" , ") : "";
+  e.nameKey = lowKey(e.code + " " + e.name + " " + e.group + " " + e.game);
+  e.lookKey = lowKey([look(e), e.clothes, look(e.cre), e.cre ? e.cre.clothes : ""].join(" , "));
+  e.outfitKeys = e.outfits.map((o, i) => {
+    const co = e.cre && e.cre.outfits[i];
+    return lowKey([look(e), o.clothes, o.pose, look(e.cre), co ? co.clothes + " , " + co.pose : ""].join(" , "));
+  });
+}
 function rebuildList(){
-  const game = $("fGame").value, g = $("fGender").value, q = $("fSearch").value.trim().toLowerCase();
+  const game = $("fGame").value, g = $("fGender").value, terms = searchTerms($("fSearch").value);
   const pass = e => (!game || String(e.part) === game) && (!g || e.gender === g);
-  const hit = s => !q || s.toLowerCase().indexOf(q) >= 0;
-  LIST = DB.filter(e => pass(e) && hit(e.code + " " + e.name + " " + e.group));
+  LIST = DB.filter(e => pass(e) && (!terms.length || matches(terms, e.nameKey, e.lookKey)));
   OLIST = [];
-  DB.forEach(e => { if (pass(e)) e.outfits.forEach((o, i) => { if (hit(e.code + " " + e.name + " " + e.group + " " + o.name)) OLIST.push({e, n: i + 1}); }); });
-  fillSelect($("charSel"), "Choose a character", LIST.map(e => ({v: e.code, t: e.code + "  " + e.name, grp: e.game + (e.group ? " (" + e.group + ")" : "")})));
+  DB.forEach(e => { if (pass(e)) e.outfits.forEach((o, i) => {
+    if (!terms.length || matches(terms, e.nameKey + " " + o.name.toLowerCase(), e.outfitKeys[i])) OLIST.push({e, n: i + 1});
+  }); });
+  const more = e => e.outfits.length ? "  (+" + e.outfits.length + (e.outfits.length > 1 ? " outfits)" : " outfit)") : "";
+  fillSelect($("charSel"), "Choose a character", LIST.map(e => ({v: e.code, t: e.code + "  " + e.name + more(e), grp: e.game + (e.group ? " (" + e.group + ")" : "")})));
   fillSelect($("outfitSel"), "Choose an outfit", OLIST.map(x => ({v: x.e.code + "|" + x.n, t: x.e.code + "  " + x.e.name + ": " + x.e.outfits[x.n - 1].name, grp: x.e.game})));
+}
+
+// ---- Back, saved prompts and links ----------------------------------------------------------
+// A snapshot keeps the text of every section (with your edits) and where each came from, by character code.
+const HIST = [];
+function snap(){
+  const ser = s => s ? Object.assign({}, s, s.e ? {e: s.e.code} : {}) : null;
+  const srcs = {}; for (const k in state.srcs) srcs[k] = ser(state.srcs[k]);
+  return {title: state.title, notes: state.notes, lite: state.lite, mixable: state.mixable, gender: state.gender,
+    cur: state.cur ? state.cur.code : null, outfit: state.outfit || 0, favId: state.favId, dan: danbooru(),
+    locks: Object.assign({}, state.locks), parts: Object.assign({}, state.parts), srcs};
+}
+function restore(x){
+  const byCode = c => DB.find(e => e.code === c) || null;
+  const de = s => { if (!s) return null; const o = Object.assign({}, s); if (o.e != null){ o.e = byCode(o.e); if (!o.e) return null; } return o; };
+  state.srcs = {}; for (const k in (x.srcs || {})) state.srcs[k] = de(x.srcs[k]);
+  state.parts = Object.assign({}, x.parts); state.locks = Object.assign({}, x.locks);
+  state.title = x.title || ""; state.notes = x.notes || ""; state.lite = !!x.lite; state.mixable = !!x.mixable; state.gender = x.gender || "";
+  state.cur = x.cur ? byCode(x.cur) : null; state.outfit = state.cur ? (x.outfit || 0) : 0; state.favId = x.favId || null;
+  if (state.cur && state.outfit > state.cur.outfits.length) state.outfit = 0;
+  // Saved in the other version: redraw from the sources (edits made in that version are not kept).
+  if (x.dan !== undefined && x.dan !== danbooru()) for (const s of SLOTS) if (s.k in state.srcs) state.parts[s.k] = render(s.k, state.srcs[s.k]);
+  setSel("charSel", state.cur && !state.outfit ? state.cur.code : "");
+  setSel("outfitSel", state.cur && state.outfit ? state.cur.code + "|" + state.outfit : "");
+  $("msg").textContent = "";
+  refresh();
+}
+function pushHist(){ if (hasPrompt()){ HIST.push(snap()); if (HIST.length > 50) HIST.shift(); } }
+
+// Saved prompts live in this browser only. A character is saved as itself plus outfit; a mix gets its own id.
+function favs(){ try { const a = JSON.parse(store("pp_favs") || "[]"); return Array.isArray(a) ? a : []; } catch(e){ return []; } }
+const favId = () => state.cur ? "c:" + state.cur.code + "|" + (state.outfit || 0) : state.favId;
+function fillFavs(){
+  const a = favs(), sel = $("favSel"); sel.innerHTML = "";
+  const first = document.createElement("option"); first.value = ""; first.textContent = "Saved (" + a.length + ")"; sel.appendChild(first);
+  a.forEach(f => { const o = document.createElement("option"); o.value = f.id; o.textContent = f.title; sel.appendChild(o); });
+  sel.disabled = !a.length;
+}
+function toggleFav(){
+  if (!hasPrompt()) return;
+  let a = favs(); const id = favId();
+  if (id && a.some(f => f.id === id)) a = a.filter(f => f.id !== id);
+  else {
+    let title = state.title;
+    if (!state.cur){
+      state.favId = "m:" + Date.now();
+      const names = ["face", "clothes", "pose"].map(k => state.srcs[k] && state.srcs[k].e ? state.srcs[k].e.name : null).filter(Boolean);
+      title = names.length ? "Mix: " + names.filter((n, i) => names.indexOf(n) === i).join(" + ") : "True random mix";
+    }
+    a.unshift({id: favId(), title, snap: snap()});
+  }
+  store("pp_favs", JSON.stringify(a.slice(0, 100)));
+  fillFavs(); refresh();
+}
+
+// The address shows the character (and outfit), e.g. #FE59 or #No005/bride, so a prompt can be bookmarked or shared.
+const slug = s => s.replace(/[^A-Za-z0-9]+/g, "");
+const oslug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+let BYSLUG = {};
+function updateHash(){
+  const h = state.cur ? "#" + slug(state.cur.code) + (state.outfit ? "/" + oslug(state.cur.outfits[state.outfit - 1].name) : "") : "";
+  if (location.hash === h) return;
+  try { history.replaceState(null, "", h || location.pathname + location.search); } catch(e){}
+}
+function fromHash(){
+  const m = decodeURIComponent(location.hash.slice(1)).split("/"), e = BYSLUG[m[0]];
+  if (!e) return false;
+  let n = 0;
+  if (m[1]){ n = e.outfits.findIndex(o => oslug(o.name) === m[1]) + 1; if (!n && /^\d+$/.test(m[1]) && +m[1] <= e.outfits.length) n = +m[1]; }
+  if (state.cur === e && state.outfit === n) return true;
+  setChar(e, n, !hasPrompt());
+  return true;
 }
 
 function loadDB(rows){
   const d = readData(rows);
   if (!d.length) return false;
   DB = d;
+  BYSLUG = {}; DB.forEach(e => { indexLooks(e); BYSLUG[slug(e.code)] = e; });
   const fg = $("fGame"), cur = fg.value; fg.innerHTML = "";
   const all = document.createElement("option"); all.value = ""; all.textContent = "All games (" + DB.length + ")"; fg.appendChild(all);
   const seen = {};
@@ -414,19 +578,36 @@ function init(){
   SLOTS.forEach(s => {
     const d = document.createElement("div"); d.className = "slot"; d.id = "slot_" + s.k;
     d.innerHTML = '<div class="slot-head"><b></b><span class="src"></span>' +
+      '<span class="tok" id="tok_' + s.k + '" title="About how many tokens this section uses. Each section is its own 75-token chunk; past 75 it spills into another chunk and its late tags pull less weight."></span>' +
       '<label><input type="checkbox" id="lock_' + s.k + '"> keep</label>' +
       '<button type="button" id="re_' + s.k + '" title="Reroll only this section">Reroll</button></div>' +
       '<textarea id="ta_' + s.k + '" rows="3" spellcheck="false"></textarea>';
     d.querySelector("b").textContent = s.label;
     box.appendChild(d);
-    $("ta_" + s.k).addEventListener("input", ev => { state.parts[s.k] = ev.target.value; $("out").value = buildPrompt(); });
+    $("ta_" + s.k).addEventListener("input", ev => { state.parts[s.k] = ev.target.value; $("out").value = buildPrompt(); showTok($("tok_" + s.k), ev.target.value); });
     $("lock_" + s.k).addEventListener("change", ev => { state.locks[s.k] = ev.target.checked; refresh(); });
     $("re_" + s.k).addEventListener("click", () => mix(s.k));
   });
-  $("fixed").value = store("pp_fixed") || DEFAULT_FIXED;
+
+  // Quality tags and negative prompt share one box area; the tab picks which one shows.
+  const boxes = {fixed: {def: DEFAULT_FIXED, key: "pp_fixed"}, neg: {def: DEFAULT_NEG, key: "pp_neg"}};
+  let tab = store("pp_tab") === "neg" ? "neg" : "fixed";
+  const showTab = t => {
+    tab = t; store("pp_tab", t);
+    $("fixed").hidden = t !== "fixed"; $("neg").hidden = t !== "neg";
+    $("tabFixed").classList.toggle("on", t === "fixed"); $("tabNeg").classList.toggle("on", t === "neg");
+    $("btnCopyNeg").hidden = t !== "neg";
+    showTok($("boxTok"), $(t).value);
+  };
+  for (const id in boxes){
+    $(id).value = store(boxes[id].key) || boxes[id].def;
+    $(id).addEventListener("input", () => { store(boxes[id].key, $(id).value); $("out").value = buildPrompt(); showTok($("boxTok"), $(id).value); });
+  }
+  $("tabFixed").addEventListener("click", () => showTab("fixed"));
+  $("tabNeg").addEventListener("click", () => showTab("neg"));
+  $("btnResetBox").addEventListener("click", () => { $(tab).value = boxes[tab].def; store(boxes[tab].key, boxes[tab].def); $("out").value = buildPrompt(); showTok($("boxTok"), $(tab).value); });
+  showTab(tab);
   $("optFixed").checked = store("pp_incfixed") !== "0";
-  $("fixed").addEventListener("input", () => { store("pp_fixed", $("fixed").value); $("out").value = buildPrompt(); });
-  $("btnResetFixed").addEventListener("click", () => { $("fixed").value = DEFAULT_FIXED; store("pp_fixed", DEFAULT_FIXED); $("out").value = buildPrompt(); });
   $("optFixed").addEventListener("change", () => { store("pp_incfixed", $("optFixed").checked ? "1" : "0"); $("out").value = buildPrompt(); });
   $("optDanbooru").checked = store("pp_danbooru") !== "0";
   $("optDanbooru").addEventListener("change", () => { store("pp_danbooru", $("optDanbooru").checked ? "1" : "0"); restyle(); });
@@ -447,16 +628,33 @@ function init(){
   });
   $("btnMix").addEventListener("click", () => mix(null));
   $("btnCopy").addEventListener("click", () => {
-    if (!SLOTS.some(s => (state.parts[s.k] || "").trim())){ $("msg").textContent = "Pick a character first."; return; }
+    if (!hasPrompt()){ $("msg").textContent = "Pick a character first."; return; }
     $("msg").textContent = "";
-    const t = buildPrompt(); $("out").value = t;
-    const btn = $("btnCopy");
-    const done = () => { btn.textContent = "Copied ✓"; btn.classList.add("done"); clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = "Copy prompt"; btn.classList.remove("done"); }, 1500); };
-    const fallback = () => { $("out").removeAttribute("readonly"); $("out").select(); try { document.execCommand("copy"); done(); } catch(e){ $("msg").textContent = "Copy failed; your browser blocked it."; } $("out").setAttribute("readonly", ""); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+    copyText(buildPrompt(), $("btnCopy"), "Copy prompt");
   });
+  $("btnCopyNeg").addEventListener("click", () => { $("msg").textContent = ""; copyText(negLine(), $("btnCopyNeg"), "Copy negative"); });
+
+  $("btnBack").addEventListener("click", () => { const x = HIST.pop(); if (x) restore(x); else refresh(); });
+  $("btnFav").addEventListener("click", toggleFav);
+  $("favSel").addEventListener("change", () => {
+    const f = favs().find(x => x.id === $("favSel").value); $("favSel").value = "";
+    if (f && f.snap){ pushHist(); restore(Object.assign({}, f.snap, {favId: f.id})); }
+  });
+  window.addEventListener("hashchange", fromHash);
+
   loadDB(JSON.parse($("data").textContent));
-  refresh();
+  fillFavs();
+  if (!(location.hash && fromHash())) refresh();
+}
+// Copy text to the clipboard and show it on the button for a moment.
+function copyText(text, btn, label){
+  const done = () => { btn.textContent = "Copied ✓"; btn.classList.add("done"); clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = label; btn.classList.remove("done"); }, 1500); };
+  const fallback = () => {
+    const o = $("out"); o.value = text; o.removeAttribute("readonly"); o.select();
+    try { document.execCommand("copy"); done(); } catch(e){ $("msg").textContent = "Copy failed; your browser blocked it."; }
+    o.setAttribute("readonly", ""); o.value = buildPrompt();
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
 }
 init();
 </script>

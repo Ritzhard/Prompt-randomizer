@@ -140,6 +140,7 @@ function ReadEntries([string[]]$src, [string]$maleFallback){
 
     $res.Add([pscustomobject]@{
       part = $part; code = $f[0]; name = $f[1]; group = $f[2]; notes = ($notes -join "`n")
+      lessSure = ($f.Count -gt 3 -and $f[3] -match 'less sure')
       lite = ($q.IndexOf('glossy skin') -lt 0); gender = $gender; multi = $multi
       tag = $tag; face = (TrimTail $face); body = ($bodyParts -join ', '); clothes = (TrimTail ($toks -join ', ')); pose = ($cam -join ', ')
       cnt = $sp[0]; bt = $sp[1]; extra = $extra; camOnly = $camOnly; outfits = $outfits
@@ -187,7 +188,7 @@ foreach ($d in $dan) {
     }
   }
   $g = (@{ female = 0; male = 1; other = 2 })[$d.gender]
-  $flags = ([int]$d.lite) + 2 * ([int]$d.multi)
+  $flags = ([int]$d.lite) + 2 * ([int]$d.multi) + 4 * ([int]$d.lessSure)
   $fields = @(
     (J $code), (J $d.name), $d.part, (J $d.group), $g, $flags, (J $d.tag), (J $d.face), (J $d.body),
     (J $d.clothes), (J $d.pose), $d.cnt, (J $d.bt), (J $d.notes), (JArr $d.extra), ('[' + ($outD -join ',') + ']')
