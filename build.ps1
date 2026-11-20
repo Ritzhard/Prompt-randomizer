@@ -32,7 +32,7 @@ function SplitTop([string]$s){
   ,$out
 }
 # Body-type tags that survive in the last section; everything else there (scenery, lighting, framing) is dropped.
-$BODY_RE = '^(?:.*breasts.*|.*flat chest.*|(adult|mature|young|teenage|old|middle-aged)( (man|woman|women|male|female))?|child|tall( (fe)?male)?|short|skinny|manly|male focus|dark skin|fat man|.*petite.*|.*slender.*|slim.*|thin|.*athletic.*|.*muscular.*|.*toned.*|abs|.*curvy.*|.*wide hips.*|.*thick thighs.*|.*chubby.*|.*plump.*|fat|.*stocky.*|.*bulky.*|round|huge|.*giantess.*|.*masculine.*|.*broad shoulders.*|.*androgynous.*|.*otoko no ko.*|.*-skinned.*|tan|.*pale skin.*|.*grey skin.*|(dark )?elf|.*monster.*|animal|.*robot.*|.*mecha musume.*|.*creature.*|ghost|were.*|.*beast.*|.*horse man.*|.*goblin.*|witch|.*raccoon.*|.*bear|.*wolf|.*chibi.*|.*armored rider.*|(fe)?male)$'
+$BODY_RE = '^(?:.*breasts.*|.*flat chest.*|(adult|mature|young|teenage|old|middle-aged)( (man|woman|women|male|female))?|child|tall( (fe)?male)?|short|skinny|manly|male focus|dark skin|fat man|thick neck|lean|burly|.*petite.*|.*slender.*|slim.*|thin|.*athletic.*|.*muscular.*|.*toned.*|abs|.*curvy.*|.*wide hips.*|.*thick thighs.*|.*chubby.*|.*plump.*|fat|.*stocky.*|.*bulky.*|round|huge|.*giantess.*|.*masculine.*|.*broad shoulders.*|.*androgynous.*|.*otoko no ko.*|.*-skinned.*|tan|.*pale skin.*|.*grey skin.*|(dark )?elf|.*monster.*|animal|.*robot.*|.*mecha musume.*|.*creature.*|ghost|were.*|.*beast.*|.*horse man.*|.*goblin.*|witch|.*raccoon.*|.*bear|.*wolf|.*chibi.*|.*armored rider.*|(fe)?male)$'
 $COUNTS = @('solo, 1girl', 'solo, 1boy', 'solo, no humans', '2girls', '2boys', '1boy, 1girl', 'solo, 1other')
 
 # Safety lists for short-quality-line characters (descriptive words and their Danbooru tags).

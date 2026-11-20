@@ -15,24 +15,26 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{display:grid;grid-template-columns:280px minmax(0,1fr);gap:12px;padding:12px}
+main{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;padding:12px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.btnrow{margin-top:10px}
-.btnrow button{padding:7px 6px}
-label.inline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:8px;white-space:nowrap}
+.row3{display:flex;gap:6px;margin-top:10px}
+.row3 button{flex:1 1 auto;padding:8px 6px;white-space:nowrap;font-size:13.5px}
+label.inline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-top:7px;white-space:nowrap}
 label.inline select{margin-top:0;flex:1;min-width:0;padding:4px 8px}
-button.copy{margin-top:4px;padding:9px 12px}
 button.copy.done{background:var(--ok);border-color:var(--ok)}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.qhead button{padding:2px 9px;font-size:12px}
+#fixed{margin-top:5px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
 h1{font-size:18px;margin:0 0 10px}
 h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}
-label.f{display:block;font-size:12.5px;color:var(--muted);margin:6px 0 0}
-select,input[type=search],textarea{width:100%;margin-top:3px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
+label.f{display:block;font-size:12.5px;color:var(--muted);margin:5px 0 0}
+select,input[type=search],textarea{width:100%;margin-top:3px;padding:5px 9px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
+select:disabled{opacity:.55}
 textarea{resize:vertical;font:12.5px/1.45 ui-monospace,Consolas,"Cascadia Mono",monospace}
 button{font:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer}
 button:hover{border-color:var(--accent)}
 button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
-.btns{display:grid;gap:6px;margin-top:10px}
 .hint{font-size:12px;color:var(--muted);margin:6px 0 0}
 .phead{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;min-height:22px}
 #title{font-size:15px;font-weight:600;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -49,20 +51,20 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .slot textarea{background:var(--panel);margin-top:5px;min-height:56px}
 #out{position:fixed;left:-9999px;top:0;width:10px;height:10px;opacity:0}
 .outbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
-.checks{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin-top:6px}
+.checks{display:flex;gap:4px 16px;flex-wrap:wrap;font-size:12.5px;margin-top:8px}
 .checks label{display:flex;gap:6px;align-items:center;cursor:pointer}
-details{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
-summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
 #msg{color:#c4320a;font-size:12.5px;margin:6px 0 0}
 #msg:empty{display:none}
 
-/* Wide, tall-enough screens: everything on one screen, the text boxes stretch to fill it. */
-@media (min-width:1100px) and (min-height:600px){
+/* Wide, tall-enough screens: everything on one screen, the text boxes stretch to fill it
+   (the quality tags box takes whatever room the controls leave). */
+@media (min-width:900px) and (min-height:540px){
   html,body{height:100%}
   body{overflow:hidden}
   main{height:100vh}
   .panel{display:flex;flex-direction:column;min-height:0}
   .controls{overflow-y:auto}
+  .controls #fixed{flex:1 1 auto;min-height:64px;resize:none}
   #slots{flex:1;display:flex;flex-direction:column;min-height:0}
   .slot{flex:1}
   .slot textarea{flex:1;resize:none;min-height:0}
@@ -84,29 +86,25 @@ summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
       </select></label>
     </div>
     <label class="f">Character<select id="charSel"></select></label>
-    <label class="f">Outfit<select id="outfitSel" disabled><option value="0">Default outfit</option></select></label>
-    <div class="row2 btnrow">
-      <button id="btnRandChar" class="primary">Random</button>
-      <button id="btnMix" class="primary">True random</button>
-    </div>
+    <label class="f" title="Characters in their official alternate outfits">Outfit<select id="outfitSel"></select></label>
     <label class="inline">Body in true random<select id="optBody">
       <option value="sometimes">50%</option><option value="always">Always</option><option value="never">Never</option>
     </select></label>
-    <label class="inline">Outfits in random<select id="optOutfits">
+    <label class="inline" title="Any official: Random can land on an outfit, and true random can use outfit clothes">Outfits in random<select id="optOutfits">
       <option value="default">Default only</option><option value="any">Any official</option>
     </select></label>
+    <div class="row3">
+      <button id="btnRandChar" class="primary">Random</button>
+      <button id="btnMix" class="primary">True random</button>
+      <button id="btnCopy" class="primary copy">Copy prompt</button>
+    </div>
     <p id="msg"></p>
-    <div class="btns"><button id="btnCopy" class="primary copy">Copy prompt</button></div>
     <div class="checks">
       <label><input type="checkbox" id="optFixed" checked> Include the quality tags</label>
       <label title="Off: the more creative, descriptive wording"><input type="checkbox" id="optDanbooru" checked> Danbooru tags only</label>
     </div>
-
-    <details>
-      <summary>Settings</summary>
-      <label class="f">Quality tags (never randomized)<textarea id="fixed" rows="9"></textarea></label>
-      <div class="outbar"><button id="btnResetFixed">Reset quality tags</button></div>
-    </details>
+    <div class="qhead"><label for="fixed">Quality tags (never randomized)</label><button type="button" id="btnResetFixed" title="Put the original quality tags back">Reset</button></div>
+    <textarea id="fixed" rows="6" spellcheck="false"></textarea>
   </section>
 
   <section class="panel">
@@ -123,7 +121,7 @@ summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
 "use strict";
 const DEFAULT_FIXED = "(masterpiece:1.4), (best quality:1.3), (ultra detail:1.3), (8k resolution:1.2), absurdres, highres, sharp focus, skin texture, detailed shading, volumetric lighting, dramatic lighting, depth of field, vibrant colors, aesthetic, studio anime style, anime screencap style, clean lineart, awe-inspiring, amazing quality, ultra-detailed, detailed hair, individual hair strands, beautiful face, intricate face, soft lips, smooth skin, glossy skin, (artist:mazjojo:0.75), (artist:pigeon666:0.70),(artist:zawar379:0.80), (artist:remsrar:0.65),(artist:chimmyming:0.72), (artist:yoneyama mai:0.73), TAxStyle, Pixie_eyelashes, Wada Arco style,";
 const LITE_DROP = ["skin texture", "soft lips", "smooth skin", "glossy skin"];
-const GAMES = {1:"Custom prompts", 2:"Fantasy originals", 3:"Fate/Grand Order", 4:"Genshin Impact", 5:"Honkai: Star Rail", 6:"Epic Seven", 7:"Unicorn Overlord", 8:"Stardew Valley", 9:"Honkai Impact 3rd", 10:"Fire Emblem Heroes", 11:"Arknights", 12:"Azur Lane", 13:"Zenless Zone Zero", 14:"Blue Archive", 15:"Uma Musume", 16:"Granblue Fantasy", 17:"Nikke", 18:"Wuthering Waves", 19:"Punishing: Gray Raven", 20:"Reverse: 1999"};
+const GAMES = {1:"Custom prompts", 2:"Fantasy originals", 3:"Fate/Grand Order", 4:"Genshin Impact", 5:"Honkai: Star Rail", 6:"Epic Seven", 7:"Unicorn Overlord", 9:"Honkai Impact 3rd", 10:"Fire Emblem Heroes", 11:"Arknights", 12:"Azur Lane", 13:"Zenless Zone Zero", 14:"Blue Archive", 15:"Uma Musume", 16:"Granblue Fantasy", 17:"Nikke", 18:"Wuthering Waves", 19:"Punishing: Gray Raven", 20:"Reverse: 1999", 21:"Wulin"};
 const SLOTS = [
   {k:"face",    label:"Face, hair, eyes, head accessories"},
   {k:"body",    label:"Body features"},
@@ -194,6 +192,8 @@ const BODY_POOL_CREATIVE = [
   {name:"Muscles", t:"(muscular, toned abs, defined arms, veins, broad shoulders)"}
 ];
 const $ = id => document.getElementById(id);
+// Select a value if the list has it, otherwise the "Choose ..." line.
+const setSel = (id, v) => { const s = $(id); s.value = v; if (s.value !== v) s.value = ""; };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const trimTail = t => t.trim().replace(/[,\s]+$/, "");
 
@@ -311,14 +311,8 @@ function outfitParts(e, n){
     pose: (o && o.pose ? o.pose : v.pose) + v.extra.map(x => ",\nBREAK " + x).join("")
   };
 }
-function fillOutfits(e, n){
-  const sel = $("outfitSel"); sel.innerHTML = "";
-  const add = (v, t) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); };
-  add(0, "Default outfit");
-  if (e) e.outfits.forEach((o, i) => add(i + 1, o.name));
-  sel.disabled = !e || !e.outfits.length;
-  sel.value = String(n || 0);
-}
+// Character e in outfit n (0 = default). The Character list holds the default outfits and the Outfit list
+// holds every official alternate outfit as its own entry; picking from one list clears the other.
 function setChar(e, n){
   n = n || 0;
   state.srcs = {face: {e, full: true}, body: {e}, clothes: {e, n}, pose: {e, n, full: true}, scene: {e}};
@@ -326,19 +320,12 @@ function setChar(e, n){
   for (const s of SLOTS) state.parts[s.k] = render(s.k, state.srcs[s.k]);
   state.locks = {};
   state.cur = e; state.outfit = n;
-  state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
+  state.title = e.code + " " + e.name + (n ? ": " + e.outfits[n - 1].name : "");
   state.notes = e.notes;
   state.lite = e.lite; state.mixable = e.mixable; state.gender = e.gender;
-  fillOutfits(e, n);
+  setSel("charSel", n ? "" : e.code);
+  setSel("outfitSel", n ? e.code + "|" + n : "");
   $("msg").textContent = "";
-  refresh();
-}
-// Switching outfit only changes the clothes (and the pose, when the outfit has its own); other edits stay.
-function setOutfit(n){
-  const e = state.cur; if (!e) return;
-  state.srcs.clothes = {e, n}; state.srcs.pose = {e, n, full: true};
-  state.parts.clothes = render("clothes", state.srcs.clothes); state.parts.pose = render("pose", state.srcs.pose); state.outfit = n;
-  state.title = e.code + " · " + e.name + (n ? " · " + e.outfits[n - 1].name : "");
   refresh();
 }
 const randomOutfit = e => ($("optOutfits").value === "any" && e.outfits.length) ? Math.floor(Math.random() * (e.outfits.length + 1)) : 0;
@@ -361,7 +348,9 @@ function mix(only){
       const mode = $("optBody").value;
       const use = only ? mode !== "never" : (mode === "always" || (mode === "sometimes" && Math.random() < 0.5));
       const P = bodyPool();
-      const bp = pool.filter(e => ver(e).body).map(e => ({e})).concat(P.map((b, i) => ({pi: i})));
+      // A body line that is only a skin tone ("(fair skin)") is not worth a pick of its own.
+      const bp = pool.filter(e => { const b = ver(e).body; return b && !/^\(?\s*(fair|pale|light|porcelain|tan|tanned)( skin)?\s*\)?,?$/i.test(b.trim()); })
+        .map(e => ({e})).concat(P.map((b, i) => ({pi: i})));
       if (use){
         const first = pick(bp), src = {e: first.e, pi: first.pi};
         if (Math.random() < 0.3){ const i2 = Math.floor(Math.random() * P.length); if (first.pi !== i2) src.pi2 = i2; }
@@ -376,22 +365,32 @@ function mix(only){
   }
   state.title = "True random mix";
   state.notes = ""; state.lite = false; state.mixable = true; state.gender = g; state.cur = null; state.outfit = 0;
-  $("charSel").value = ""; fillOutfits(null, 0);
+  $("charSel").value = ""; $("outfitSel").value = "";
   refresh();
 }
 
+// A dropdown with a count in its first line, grouped under headings; keeps the current pick when it still matches.
+function fillSelect(sel, label, items){
+  const cur = sel.value; sel.innerHTML = "";
+  const first = document.createElement("option"); first.value = ""; first.textContent = label + " (" + items.length + ")"; sel.appendChild(first);
+  let og = null, key = null;
+  items.forEach(it => {
+    if (it.grp !== key){ og = document.createElement("optgroup"); og.label = it.grp; sel.appendChild(og); key = it.grp; }
+    const o = document.createElement("option"); o.value = it.v; o.textContent = it.t; og.appendChild(o);
+  });
+  sel.value = cur && items.some(it => it.v === cur) ? cur : "";
+  sel.disabled = !items.length;
+}
+let OLIST = [];   // [{e, n}]: the official alternate outfits that match the filters
 function rebuildList(){
   const game = $("fGame").value, g = $("fGender").value, q = $("fSearch").value.trim().toLowerCase();
-  LIST = DB.filter(e => (!game || String(e.part) === game) && (!g || e.gender === g) &&
-    (!q || (e.code + " " + e.name + " " + e.group).toLowerCase().indexOf(q) >= 0));
-  const sel = $("charSel"); sel.innerHTML = "";
-  const first = document.createElement("option"); first.value = ""; first.textContent = "Choose a character (" + LIST.length + ")"; sel.appendChild(first);
-  let og = null, key = "";
-  LIST.forEach(e => {
-    const k = e.game + (e.group ? " (" + e.group + ")" : "");
-    if (k !== key){ og = document.createElement("optgroup"); og.label = k; sel.appendChild(og); key = k; }
-    const o = document.createElement("option"); o.value = e.code; o.textContent = e.code + "  " + e.name; og.appendChild(o);
-  });
+  const pass = e => (!game || String(e.part) === game) && (!g || e.gender === g);
+  const hit = s => !q || s.toLowerCase().indexOf(q) >= 0;
+  LIST = DB.filter(e => pass(e) && hit(e.code + " " + e.name + " " + e.group));
+  OLIST = [];
+  DB.forEach(e => { if (pass(e)) e.outfits.forEach((o, i) => { if (hit(e.code + " " + e.name + " " + e.group + " " + o.name)) OLIST.push({e, n: i + 1}); }); });
+  fillSelect($("charSel"), "Choose a character", LIST.map(e => ({v: e.code, t: e.code + "  " + e.name, grp: e.game + (e.group ? " (" + e.group + ")" : "")})));
+  fillSelect($("outfitSel"), "Choose an outfit", OLIST.map(x => ({v: x.e.code + "|" + x.n, t: x.e.code + "  " + x.e.name + ": " + x.e.outfits[x.n - 1].name, grp: x.e.game})));
 }
 
 function loadDB(rows){
@@ -434,12 +433,17 @@ function init(){
   ["fGame", "fGender"].forEach(id => $(id).addEventListener("change", rebuildList));
   $("fSearch").addEventListener("input", rebuildList);
   $("charSel").addEventListener("change", () => { const e = DB.find(x => x.code === $("charSel").value); if (e) setChar(e, 0); });
-  $("outfitSel").addEventListener("change", () => setOutfit(+$("outfitSel").value));
+  $("outfitSel").addEventListener("change", () => {
+    const v = $("outfitSel").value, i = v.lastIndexOf("|"); if (i < 0) return;
+    const e = DB.find(x => x.code === v.slice(0, i)); if (e) setChar(e, +v.slice(i + 1));
+  });
   $("optOutfits").value = store("pp_outfits") === "any" ? "any" : "default";
   $("optOutfits").addEventListener("change", () => store("pp_outfits", $("optOutfits").value));
+  // Random: any matching character; with "Any official" the matching outfits are in the draw too.
   $("btnRandChar").addEventListener("click", () => {
-    if (!LIST.length){ $("msg").textContent = "No characters match the filters."; return; }
-    const e = pick(LIST); $("charSel").value = e.code; setChar(e, randomOutfit(e));
+    const pool = LIST.map(e => ({e, n: 0})).concat($("optOutfits").value === "any" ? OLIST : []);
+    if (!pool.length){ $("msg").textContent = "Nothing matches the filters."; return; }
+    const x = pick(pool); setChar(x.e, x.n);
   });
   $("btnMix").addEventListener("click", () => mix(null));
   $("btnCopy").addEventListener("click", () => {
